@@ -15,6 +15,7 @@ import Liquidity from '@pages/Liquidity'
 import Trading from '@pages/Trading'
 import Analytics from '@pages/Analytics'
 import PriceMonitoring from '@pages/PriceMonitoring'
+import Deployment from '@pages/Deployment'
 import Settings from '@pages/Settings'
 import NotFound from '@pages/NotFound'
 
@@ -84,6 +85,7 @@ function App() {
                 <Route path="/trading" element={<Trading />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/price-monitoring" element={<PriceMonitoring />} />
+                <Route path="/deployment" element={<Deployment />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

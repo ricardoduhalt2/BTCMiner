@@ -11,7 +11,7 @@ import {
   CogIcon,
   XMarkIcon,
   SparklesIcon,
-  ChevronRightIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
 
 interface SidebarProps {
@@ -34,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     { name: 'Portfolio', href: '/portfolio', icon: ChartBarIcon, color: 'text-yellow-400' },
     { name: 'Liquidity', href: '/liquidity', icon: BeakerIcon, color: 'text-cyan-400' },
     { name: 'Price Monitor', href: '/price-monitoring', icon: CurrencyDollarIcon, color: 'text-orange-400' },
+    { name: 'Deployment', href: '/deployment', icon: RocketLaunchIcon, color: 'text-red-400' },
     { name: 'Settings', href: '/settings', icon: CogIcon, color: 'text-gray-400' },
   ]
 
