@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTCMiner ICP Dashboard</title>
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --icp-blue: #29abe2;
+            --icp-purple: #6c5ce7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--icp-blue), var(--icp-purple));
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online { background-color: var(--success); }
+        .status-warning { background-color: var(--warning); }
+        .status-offline { background-color: var(--danger); }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-header i {
+            font-size: 1.8rem;
+            margin-right: 12px;
+            color: var(--icp-blue);
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--icp-blue);
+            box-shadow: 0 0 0 3px rgba(41, 171, 226, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--icp-blue), var(--icp-purple));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(41, 171, 226, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            border-left: 4px solid var(--icp-blue);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--icp-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border-color: var(--success);
+            color: #d4edda;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: var(--warning);
+            color: #fff3cd;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: var(--danger);
+            color: #f8d7da;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--icp-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chain-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .chain-option {
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chain-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chain-option.selected {
+            border-color: var(--icp-blue);
+            background: rgba(41, 171, 226, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-infinity"></i> BTCMiner ICP Dashboard</h1>
+            <p>Digital Identity • Price Monitoring • Liquidity Health</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator status-online" id="identity-status"></div>
+                <span>Digital Identity</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator status-online" id="price-status"></div>
+                <span>Price Monitor</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator status-online" id="liquidity-status"></div>
+                <span>Liquidity Health</span>
+            </div>
+            <div class="status-item">
+                <strong>Network: <span id="network-info">Local</span></strong>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Digital Identity Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-id-card"></i>
+                    <h3>Digital Identity</h3>
+                </div>
+                
+                <div class="form-group">
+                    <label>Wallet Address</label>
+                    <input type="text" class="form-control" id="wallet-address" 
+                           placeholder="0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Chain</label>
+                    <div class="chain-selector">
+                        <div class="chain-option selected" data-chain="1" data-name="Ethereum">
+                            <i class="fab fa-ethereum"></i><br>Ethereum
+                        </div>
+                        <div class="chain-option" data-chain="56" data-name="BNB Chain">
+                            <i class="fas fa-coins"></i><br>BNB Chain
+                        </div>
+                        <div class="chain-option" data-chain="8453" data-name="Base">
+                            <i class="fas fa-layer-group"></i><br>Base
+                        </div>
+                        <div class="chain-option" data-chain="1399811149" data-name="Solana">
+                            <i class="fas fa-sun"></i><br>Solana
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="linkWallet()">
+                        <i class="fas fa-link"></i> Link Wallet
+                    </button>
+                    <button class="btn btn-success" onclick="getMyProfile()">
+                        <i class="fas fa-user"></i> My Profile
+                    </button>
+                    <button class="btn btn-warning" onclick="getStats()">
+                        <i class="fas fa-chart-bar"></i> Stats
+                    </button>
+                </div>
+                
+                <div class="result-area" id="identity-result">Ready to link wallets...</div>
+            </div>
+
+            <!-- Price Monitor Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Price Monitor</h3>
+                </div>
+                
+                <div class="form-group">
+                    <label>Chain ID</label>
+                    <select class="form-control" id="price-chain">
+                        <option value="1">Ethereum (1)</option>
+                        <option value="56">BNB Chain (56)</option>
+                        <option value="8453">Base (8453)</option>
+                        <option value="1399811149">Solana (1399811149)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price (USD)</label>
+                    <input type="number" class="form-control" id="price-value" 
+                           placeholder="1850.75" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Source</label>
+                    <input type="text" class="form-control" id="price-source" 
+                           placeholder="CoinGecko" value="Dashboard">
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="updatePrice()">
+                        <i class="fas fa-upload"></i> Update Price
+                    </button>
+                    <button class="btn btn-success" onclick="getAllPrices()">
+                        <i class="fas fa-list"></i> All Prices
+                    </button>
+                    <button class="btn btn-warning" onclick="getAlerts()">
+                        <i class="fas fa-exclamation-triangle"></i> Alerts
+                    </button>
+                </div>
+                
+                <div class="result-area" id="price-result">Ready to monitor prices...</div>
+            </div>
+
+            <!-- Liquidity Health Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tint"></i>
+                    <h3>Liquidity Health</h3>
+                </div>
+                
+                <div class="form-group">
+                    <label>Chain ID</label>
+                    <select class="form-control" id="liquidity-chain">
+                        <option value="1">Ethereum (1)</option>
+                        <option value="56">BNB Chain (56)</option>
+                        <option value="8453">Base (8453)</option>
+                        <option value="1399811149">Solana (1399811149)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Total Liquidity</label>
+                    <input type="number" class="form-control" id="total-liquidity" 
+                           placeholder="1000000" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Available Liquidity</label>
+                    <input type="number" class="form-control" id="available-liquidity" 
+                           placeholder="800000" step="0.01">
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="updateLiquidity()">
+                        <i class="fas fa-sync"></i> Update
+                    </button>
+                    <button class="btn btn-success" onclick="getAllLiquidity()">
+                        <i class="fas fa-eye"></i> View All
+                    </button>
+                    <button class="btn btn-danger" onclick="getCriticalChains()">
+                        <i class="fas fa-exclamation"></i> Critical
+                    </button>
+                </div>
+                
+                <div class="result-area" id="liquidity-result">Ready to monitor liquidity...</div>
+            </div>
+        </div>
+
+        <!-- Statistics Dashboard -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tachometer-alt"></i>
+                <h3>System Overview</h3>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-users">-</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-wallets">-</div>
+                    <div class="stat-label">Linked Wallets</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="price-updates">-</div>
+                    <div class="stat-label">Price Updates</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="active-alerts">-</div>
+                    <div class="stat-label">Active Alerts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avg-health">-</div>
+                    <div class="stat-label">Avg Health Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="critical-chains">-</div>
+                    <div class="stat-label">Critical Chains</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn btn-primary" onclick="refreshStats()">
+                    <i class="fas fa-refresh"></i> Refresh Statistics
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>BTCMiner ICP Dashboard</strong></p>
+            <p>Powered by Internet Computer Protocol • Multi-Chain Digital Identity</p>
+            <p><small>Connected to local development environment</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedChain = 1;
+        let selectedChainName = "Ethereum";
+
+        // Chain selection
+        document.querySelectorAll('.chain-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.chain-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedChain = parseInt(this.dataset.chain);
+                selectedChainName = this.dataset.name;
+            });
+        });
+
+        // Utility functions
+        function showLoading(elementId) {
+            document.getElementById(elementId).innerHTML = '<div class="loading"></div> Processing...';
+        }
+
+        function showResult(elementId, result, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = isError ? `❌ Error: ${result}` : `✅ ${result}`;
+        }
+
+        function formatResult(data) {
+            return JSON.stringify(data, null, 2);
+        }
+
+        // Digital Identity Functions
+        async function linkWallet() {
+            const address = document.getElementById('wallet-address').value;
+            if (!address) {
+                showResult('identity-result', 'Please enter a wallet address', true);
+                return;
+            }
+
+            showLoading('identity-result');
+            
+            // Simulate API call
+            setTimeout(() => {
+                const result = {
+                    success: true,
+                    message: `Wallet ${address} linked to ${selectedChainName}`,
+                    chainId: selectedChain,
+                    timestamp: new Date().toISOString()
+                };
+                showResult('identity-result', formatResult(result));
+                refreshStats();
+            }, 1500);
+        }
+
+        async function getMyProfile() {
+            showLoading('identity-result');
+            
+            setTimeout(() => {
+                const profile = {
+                    principal: "rdmx6-jaaaa-aaaah-qcaiq-cai",
+                    wallets: [
+                        {
+                            address: "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b",
+                            chainId: 1,
+                            chainName: "Ethereum",
+                            verified: true,
+                            linkedAt: "2024-01-15T10:30:00Z"
+                        }
+                    ],
+                    totalTransactions: 5,
+                    preferredChain: 1,
+                    createdAt: "2024-01-15T10:30:00Z"
+                };
+                showResult('identity-result', formatResult(profile));
+            }, 1000);
+        }
+
+        async function getStats() {
+            showLoading('identity-result');
+            
+            setTimeout(() => {
+                const stats = {
+                    totalUsers: 42,
+                    totalWallets: 127,
+                    supportedChains: 4,
+                    lastUpdate: new Date().toISOString()
+                };
+                showResult('identity-result', formatResult(stats));
+                updateStatsDisplay(stats);
+            }, 800);
+        }
+
+        // Price Monitor Functions
+        async function updatePrice() {
+            const chainId = document.getElementById('price-chain').value;
+            const price = document.getElementById('price-value').value;
+            const source = document.getElementById('price-source').value;
+
+            if (!price) {
+                showResult('price-result', 'Please enter a price', true);
+                return;
+            }
+
+            showLoading('price-result');
+            
+            setTimeout(() => {
+                const result = {
+                    success: true,
+                    chainId: parseInt(chainId),
+                    price: parseFloat(price),
+                    source: source,
+                    timestamp: new Date().toISOString(),
+                    deviation: Math.random() * 2 // Simulate deviation
+                };
+                
+                showResult('price-result', formatResult(result));
+                
+                // Simulate alert if deviation > 1%
+                if (result.deviation > 1) {
+                    setTimeout(() => {
+                        document.getElementById('price-result').innerHTML += 
+                            `\n\n🚨 PRICE ALERT: Deviation of ${result.deviation.toFixed(2)}% detected!`;
+                    }, 1000);
+                }
+                
+                refreshStats();
+            }, 1200);
+        }
+
+        async function getAllPrices() {
+            showLoading('price-result');
+            
+            setTimeout(() => {
+                const prices = [
+                    { chainId: 1, chainName: "Ethereum", price: 1850.75, timestamp: new Date().toISOString() },
+                    { chainId: 56, chainName: "BNB Chain", price: 225.50, timestamp: new Date().toISOString() },
+                    { chainId: 8453, chainName: "Base", price: 1.25, timestamp: new Date().toISOString() },
+                    { chainId: 1399811149, chainName: "Solana", price: 95.30, timestamp: new Date().toISOString() }
+                ];
+                showResult('price-result', formatResult(prices));
+            }, 1000);
+        }
+
+        async function getAlerts() {
+            showLoading('price-result');
+            
+            setTimeout(() => {
+                const alerts = [
+                    {
+                        chainId: 8453,
+                        chainName: "Base",
+                        deviation: 2.1,
+                        currentPrice: 1.28,
+                        averagePrice: 1.25,
+                        severity: "Medium",
+                        timestamp: new Date().toISOString()
+                    }
+                ];
+                showResult('price-result', formatResult(alerts));
+            }, 800);
+        }
+
+        // Liquidity Health Functions
+        async function updateLiquidity() {
+            const chainId = document.getElementById('liquidity-chain').value;
+            const total = document.getElementById('total-liquidity').value;
+            const available = document.getElementById('available-liquidity').value;
+
+            if (!total || !available) {
+                showResult('liquidity-result', 'Please enter liquidity amounts', true);
+                return;
+            }
+
+            showLoading('liquidity-result');
+            
+            setTimeout(() => {
+                const utilizationRate = ((total - available) / total * 100).toFixed(1);
+                const availabilityRate = (available / total * 100).toFixed(1);
+                
+                let warningLevel = "Normal";
+                if (availabilityRate < 10) warningLevel = "Emergency";
+                else if (availabilityRate < 20) warningLevel = "Critical";
+                else if (availabilityRate < 50) warningLevel = "Low";
+                
+                const result = {
+                    chainId: parseInt(chainId),
+                    totalLiquidity: parseFloat(total),
+                    availableLiquidity: parseFloat(available),
+                    utilizationRate: parseFloat(utilizationRate),
+                    availabilityRate: parseFloat(availabilityRate),
+                    warningLevel: warningLevel,
+                    healthScore: Math.min(100, availabilityRate * 2),
+                    timestamp: new Date().toISOString()
+                };
+                
+                showResult('liquidity-result', formatResult(result));
+                refreshStats();
+            }, 1200);
+        }
+
+        async function getAllLiquidity() {
+            showLoading('liquidity-result');
+            
+            setTimeout(() => {
+                const liquidity = [
+                    { chainId: 1, chainName: "Ethereum", totalLiquidity: 1000000, availableLiquidity: 800000, warningLevel: "Normal" },
+                    { chainId: 56, chainName: "BNB Chain", totalLiquidity: 500000, availableLiquidity: 100000, warningLevel: "Low" },
+                    { chainId: 8453, chainName: "Base", totalLiquidity: 200000, availableLiquidity: 15000, warningLevel: "Critical" },
+                    { chainId: 1399811149, chainName: "Solana", totalLiquidity: 100000, availableLiquidity: 3000, warningLevel: "Emergency" }
+                ];
+                showResult('liquidity-result', formatResult(liquidity));
+            }, 1000);
+        }
+
+        async function getCriticalChains() {
+            showLoading('liquidity-result');
+            
+            setTimeout(() => {
+                const critical = [
+                    { chainId: 8453, chainName: "Base", availableLiquidity: 15000, warningLevel: "Critical" },
+                    { chainId: 1399811149, chainName: "Solana", availableLiquidity: 3000, warningLevel: "Emergency" }
+                ];
+                showResult('liquidity-result', formatResult(critical));
+            }, 800);
+        }
+
+        // Statistics Functions
+        function updateStatsDisplay(stats) {
+            if (stats.totalUsers) document.getElementById('total-users').textContent = stats.totalUsers;
+            if (stats.totalWallets) document.getElementById('total-wallets').textContent = stats.totalWallets;
+        }
+
+        async function refreshStats() {
+            // Simulate fetching real stats
+            setTimeout(() => {
+                document.getElementById('total-users').textContent = Math.floor(Math.random() * 100) + 20;
+                document.getElementById('total-wallets').textContent = Math.floor(Math.random() * 300) + 50;
+                document.getElementById('price-updates').textContent = Math.floor(Math.random() * 1000) + 100;
+                document.getElementById('active-alerts').textContent = Math.floor(Math.random() * 10);
+                document.getElementById('avg-health').textContent = (Math.random() * 40 + 60).toFixed(1) + '%';
+                document.getElementById('critical-chains').textContent = Math.floor(Math.random() * 3);
+            }, 500);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStats();
+            
+            // Simulate periodic updates
+            setInterval(() => {
+                // Update status indicators randomly
+                const indicators = ['identity-status', 'price-status', 'liquidity-status'];
+                indicators.forEach(id => {
+                    const element = document.getElementById(id);
+                    const classes = ['status-online', 'status-warning', 'status-offline'];
+                    const randomClass = classes[Math.floor(Math.random() * classes.length)];
+                    element.className = `status-indicator ${randomClass}`;
+                });
+            }, 10000);
+        });
+
+        // Add some demo data on load
+        setTimeout(() => {
+            document.getElementById('wallet-address').value = '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b';
+            document.getElementById('price-value').value = '1850.75';
+            document.getElementById('total-liquidity').value = '1000000';
+            document.getElementById('available-liquidity').value = '800000';
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "canisters": {
+    "btcminer_identity": {
+      "type": "motoko",
+      "main": "src/identity/main.mo"
+    },
+    "btcminer_price_monitor": {
+      "type": "motoko", 
+      "main": "src/price_monitor/main.mo"
+    },
+    "btcminer_liquidity_health": {
+      "type": "motoko",
+      "main": "src/liquidity_health/main.mo"
+    },
+    "btcminer_frontend": {
+      "type": "assets",
+      "source": ["frontend/"]
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://icp0.io"],
+      "type": "persistent"
+    }
+  },
+  "output_env_file": ".env.icp"
+}

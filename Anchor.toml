@@ -1,0 +1,37 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+btcminer_solana = "BTCMinerSoLaNa11111111111111111111111111111"
+
+[programs.devnet]
+btcminer_solana = "BTCMinerSoLaNa11111111111111111111111111111"
+
+[programs.mainnet]
+btcminer_solana = "BTCMinerSoLaNa11111111111111111111111111111"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+upgradeable = false
+
+[[test.genesis]]
+address = "BTCMinerSoLaNa11111111111111111111111111111"
+program = "target/deploy/btcminer_solana.so"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+clone = [
+    { address = "worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth", program_id = "Bridge1p5gheXUvJ6jGWGeCsgPKgnE3YgdGKRVCMY9o" },
+]

@@ -1,0 +1,35 @@
+{
+  "name": "btcminer-solana",
+  "version": "0.1.0",
+  "description": "BTCMiner Solana Program with Wormhole Cross-Chain Integration",
+  "main": "index.js",
+  "scripts": {
+    "build": "anchor build",
+    "test": "anchor test",
+    "deploy": "anchor deploy",
+    "deploy:devnet": "anchor deploy --provider.cluster devnet",
+    "deploy:mainnet": "anchor deploy --provider.cluster mainnet",
+    "test:devnet": "anchor test --provider.cluster devnet",
+    "localnet": "solana-test-validator",
+    "logs": "solana logs",
+    "clean": "anchor clean"
+  },
+  "keywords": ["solana", "anchor", "wormhole", "cross-chain", "btcminer"],
+  "author": "BTCMiner Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/spl-token": "^0.4.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0",
+    "chai": "^4.3.0",
+    "mocha": "^10.0.0",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/web3.js": "^1.87.0",
+    "@solana/spl-token": "^0.4.0"
+  }
+}

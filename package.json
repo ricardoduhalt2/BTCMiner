@@ -1,0 +1,50 @@
+{
+  "name": "btcminer-layerzero-oft",
+  "version": "1.0.0",
+  "description": "BTCMiner omnichain fungible token using LayerZero infrastructure",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:testnet": "hardhat run scripts/deploy-testnet.ts",
+    "deploy:mainnet": "hardhat run scripts/deploy-mainnet.ts",
+    "verify": "hardhat verify",
+    "node": "hardhat node",
+    "clean": "hardhat clean",
+    "🚀:multichain": "npx hardhat run scripts/deploy-multichain.ts",
+    "🌟:solana": "npx ts-node scripts/deploy-solana.ts",
+    "🌉:solana-bridge": "npx ts-node scripts/setup-solana-bridge.ts",
+    "🌌:multiverse": "npx ts-node scripts/deploy-all-testnets.ts",
+    "🎨:dashboard": "open deployment-dashboard.html",
+    "🧪:test-epic": "npm test && echo '🎉 All tests passed! Ready for multiverse deployment!'",
+    "🚀:icp-deploy": "./scripts/deploy-icp.sh",
+    "🧪:icp-test": "./scripts/test-icp-canisters.sh",
+    "🔥:deploy-everything": "npm run compile && npm run 🧪:test-epic && npm run 🌌:multiverse"
+  },
+  "keywords": ["layerzero", "oft", "cross-chain", "btcminer", "defi"],
+  "author": "BTCMiner Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "chai": "^4.3.0",
+    "hardhat": "^2.19.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": "^10.9.0",
+    "typechain": "^8.3.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@layerzerolabs/solidity-examples": "^1.1.0",
+    "@openzeppelin/contracts": "^4.9.0",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@chainlink/contracts": "^0.6.1",
+    "dotenv": "^16.3.0",
+    "ethers": "^6.8.0"
+  }
+}
