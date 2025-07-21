@@ -73,7 +73,6 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -119,16 +118,8 @@ Cargo.lock
 
 # Deployment files
 deployment-*.json
-*-deployment.json
+multiverse-deployment-*.json
+icp-deployment.json
 
 # Local development
 .local/
-.cache/
-
-# Testing
-coverage/
-.nyc_output/
-
-# Misc
-*.tgz
-*.tar.gz

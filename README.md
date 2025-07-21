@@ -1,48 +1,49 @@
-# BTCMiner - Multi-Chain DeFi Platform
+# BTCMiner - Multi-Chain Token Ecosystem
 
 ![BTCMiner Logo](frontend/public/logoBTCMINER.png)
 
-BTCMiner is a comprehensive multi-chain DeFi platform that enables seamless token operations across Ethereum, BNB Chain, Base, Solana, and Internet Computer Protocol (ICP). The platform features advanced UI animations, dark mode by default, and a sophisticated cross-chain bridge system.
+BTCMiner is a comprehensive multi-chain token ecosystem that enables seamless cross-chain operations, liquidity management, and decentralized identity across Ethereum, BNB Chain, Base, Solana, and Internet Computer Protocol (ICP).
 
 ## 🌟 Features
 
-### 🎨 **Advanced UI & Animations**
+### 🔗 Multi-Chain Support
+- **Ethereum** - EVM-compatible smart contracts with LayerZero OFT integration
+- **BNB Chain** - High-performance transactions with low fees
+- **Base** - Coinbase's L2 solution for scalable operations
+- **Solana** - High-speed blockchain with SPL token support
+- **ICP** - Internet Computer Protocol for decentralized identity and oracles
+
+### 🎨 Advanced Frontend
 - **Dark Mode by Default** - Modern, eye-friendly interface
 - **Smooth Animations** - Framer Motion powered micro-interactions
 - **Responsive Design** - Mobile-first approach with TailwindCSS
-- **Accessibility Compliant** - WCAG AA standards with reduced motion support
+- **Real-time Updates** - WebSocket integration for live data
+- **Multi-wallet Support** - MetaMask, WalletConnect, Phantom, Internet Identity
 
-### 🔗 **Multi-Chain Support**
-- **Ethereum** - LayerZero OFT integration
-- **BNB Chain** - Cross-chain token operations
-- **Base** - Layer 2 scaling solution
-- **Solana** - High-performance blockchain
-- **ICP** - Internet Computer Protocol for identity and oracles
+### 🔐 Security Features
+- **Multi-signature Governance** - 3-of-5 multisig for admin functions
+- **Daily Limits** - 1M token daily mint limits per user
+- **Emergency Controls** - Pausable functionality for security
+- **Audit Ready** - Prepared for tier-1 security audits
 
-### 💼 **Wallet Integration**
-- **MetaMask** - Ethereum and EVM chains
-- **WalletConnect** - Universal wallet connection
-- **Phantom** - Solana wallet integration
-- **Internet Identity** - ICP authentication
+### 💱 Cross-Chain Bridge
+- **LayerZero Integration** - Secure cross-chain messaging
+- **Wormhole Support** - Solana-EVM bridging
+- **Slippage Protection** - For transactions over $10,000
+- **Gas Optimization** - Minimize transaction costs
 
-### 🌉 **Cross-Chain Bridge**
-- **LayerZero OFT** - Omnichain Fungible Tokens
-- **Wormhole** - Solana bridge integration
-- **Real-time Tracking** - Transaction status monitoring
-- **Gas Optimization** - Cost-effective transfers
-
-### 📊 **DeFi Features**
-- **Portfolio Dashboard** - Multi-chain balance aggregation
-- **Price Monitoring** - Real-time price feeds and alerts
-- **Liquidity Management** - Automated rebalancing
-- **Trading Interface** - Advanced order types
-- **Analytics** - Comprehensive reporting
+### 📊 Analytics & Monitoring
+- **Real-time Price Feeds** - Multi-oracle aggregation
+- **Liquidity Analytics** - APY calculations and pool health
+- **Portfolio Tracking** - Cross-chain balance aggregation
+- **Performance Metrics** - >99% success rate monitoring
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+ and npm
+- Rust and Cargo (for Solana)
+- DFX SDK (for ICP)
 - Git
 
 ### Installation
@@ -55,110 +56,84 @@ cd BTCMiner
 
 2. **Install dependencies**
 ```bash
-# Root dependencies
 npm install
-
-# Frontend dependencies
-cd frontend
-npm install
-cd ..
+cd frontend && npm install
 ```
 
-3. **Environment Setup**
+3. **Set up environment variables**
 ```bash
-# Copy environment template
 cp .env.example .env
-
-# Configure your environment variables
-# Add your RPC URLs, private keys, etc.
+# Edit .env with your configuration
 ```
 
-4. **Start Development Server**
+4. **Start the development server**
 ```bash
-# Start frontend
-cd frontend
-npm run dev
+# Frontend
+cd frontend && npm run dev
 
-# In another terminal, compile contracts
-npm run compile
+# Hardhat (separate terminal)
+npx hardhat node
+
+# ICP (separate terminal)
+cd icp && dfx start --clean
 ```
 
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 BTCMiner/
-├── contracts/              # Smart contracts
-│   ├── BTCMiner.sol        # Main ERC-20 contract
-│   └── WormholeBridge.sol  # Cross-chain bridge
-├── frontend/               # React frontend
+├── contracts/              # Solidity smart contracts
+│   ├── BTCMiner.sol        # Main ERC-20 token with LayerZero OFT
+│   └── WormholeBridge.sol  # Cross-chain bridge contract
+├── frontend/               # React.js frontend application
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom hooks
-│   │   ├── store/          # Redux store
-│   │   ├── services/       # API services
-│   │   └── utils/          # Utility functions
-│   └── public/             # Static assets
-├── scripts/                # Deployment scripts
-├── icp/                    # ICP canisters
-├── solana/                 # Solana program
-├── test/                   # Contract tests
-└── .kiro/                  # Kiro IDE specifications
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/         # Application pages
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── store/         # Redux store and slices
+│   │   └── utils/         # Utility functions
+│   └── public/            # Static assets
+├── icp/                   # Internet Computer canisters
+│   ├── src/identity/      # Digital identity canister
+│   ├── src/price_monitor/ # Price oracle canister
+│   └── src/liquidity_health/ # Liquidity monitoring
+├── solana/                # Solana program
+│   ├── src/lib.rs         # Anchor program
+│   └── tests/             # Solana tests
+├── scripts/               # Deployment and utility scripts
+├── test/                  # Smart contract tests
+└── deployments/           # Deployment configurations
 ```
 
-## 🛠 Development
+## 🔧 Development
 
-### Smart Contracts
-
+### Smart Contracts (Hardhat)
 ```bash
 # Compile contracts
-npm run compile
+npx hardhat compile
 
 # Run tests
-npm test
+npx hardhat test
 
 # Deploy to testnet
-npm run deploy:testnet
-
-# Deploy to mainnet
-npm run deploy:mainnet
+npx hardhat run scripts/deploy-testnet.ts --network bscTestnet
 ```
 
-### Frontend Development
-
+### Frontend (React + Vite)
 ```bash
 cd frontend
 
-# Start development server
+# Development server
 npm run dev
 
 # Build for production
 npm run build
 
 # Run tests
-npm test
-
-# Lint code
-npm run lint
+npm run test
 ```
 
-### ICP Development
-
-```bash
-cd icp
-
-# Start local replica
-dfx start --background
-
-# Deploy canisters
-dfx deploy
-
-# Stop replica
-dfx stop
-```
-
-### Solana Development
-
+### Solana Program (Anchor)
 ```bash
 cd solana
 
@@ -172,70 +147,75 @@ anchor test
 anchor deploy --provider.cluster devnet
 ```
 
-## 🔧 Configuration
+### ICP Canisters (DFX)
+```bash
+cd icp
 
-### Environment Variables
+# Start local replica
+dfx start --clean
 
-Create a `.env` file with the following variables:
+# Deploy canisters
+dfx deploy
 
-```env
-# RPC URLs
-ETHEREUM_RPC_URL=your_ethereum_rpc
-BSC_RPC_URL=your_bsc_rpc
-BASE_RPC_URL=your_base_rpc
-SOLANA_RPC_URL=your_solana_rpc
-
-# Private Keys (for deployment)
-PRIVATE_KEY=your_private_key
-
-# API Keys
-COINGECKO_API_KEY=your_coingecko_key
-CHAINLINK_API_KEY=your_chainlink_key
-
-# LayerZero Configuration
-LAYERZERO_ENDPOINT_ETHEREUM=0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675
-LAYERZERO_ENDPOINT_BSC=0x3c2269811836af69497E5F486A85D7316753cf62
-LAYERZERO_ENDPOINT_BASE=0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7
-
-# Wormhole Configuration
-WORMHOLE_CORE_BRIDGE_ETHEREUM=0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B
-WORMHOLE_CORE_BRIDGE_BSC=0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B
+# Interact with canisters
+dfx canister call btcminer_identity register_wallet
 ```
 
-## 🎨 UI Features
+## 🌐 Deployment
 
-### Dark Mode & Animations
-- **Default Dark Theme** - Elegant dark interface by default
-- **Smooth Transitions** - 300ms transitions with easing
-- **Micro-interactions** - Button ripples, hover effects
-- **Loading States** - Skeleton loaders and spinners
-- **Error Handling** - Graceful error boundaries
+### Testnet Deployment
+```bash
+# Deploy to all testnets
+npm run deploy:testnets
 
-### Responsive Design
-- **Mobile First** - Optimized for mobile devices
-- **Tablet Support** - Adaptive layouts for tablets
-- **Desktop Enhanced** - Full-featured desktop experience
+# Deploy specific chain
+npm run deploy:ethereum-testnet
+npm run deploy:bsc-testnet
+npm run deploy:base-testnet
+```
 
-## 🔐 Security Features
+### Mainnet Deployment
+```bash
+# Deploy to all mainnets (requires audit)
+npm run deploy:mainnets
+```
 
-- **Multi-signature Support** - 3-of-5 multisig governance
-- **Daily Limits** - 1M token daily mint limits
-- **Emergency Pause** - Circuit breaker functionality
-- **Audit Ready** - Prepared for security audits
-- **Bug Bounty** - Community security testing
+## 📋 Roadmap
 
-## 📊 Monitoring & Analytics
+### Phase 1: Core Infrastructure ✅
+- [x] Multi-chain smart contracts
+- [x] LayerZero OFT integration
+- [x] Basic frontend interface
+- [x] Wallet connections
 
-- **Real-time Metrics** - Live transaction monitoring
-- **Price Tracking** - Multi-chain price aggregation
-- **Liquidity Health** - Pool health monitoring
-- **Performance Analytics** - Gas optimization tracking
+### Phase 2: Advanced Features ✅
+- [x] Cross-chain bridging
+- [x] Real-time price feeds
+- [x] Dark mode UI with animations
+- [x] Identity management
+
+### Phase 3: DeFi Integration 🚧
+- [ ] Liquidity pools and farming
+- [ ] Advanced trading features
+- [ ] Portfolio analytics
+- [ ] Mobile app (PWA)
+
+### Phase 4: Governance & Security 📋
+- [ ] DAO governance token
+- [ ] Security audits
+- [ ] Bug bounty program
+- [ ] Mainnet launch
+
+## 🔒 Security
+
+- **Audits**: Prepared for Certik, OtterSec, and Halborn audits
+- **Bug Bounty**: Community-driven security testing
+- **Multisig**: 3-of-5 multisig for critical operations
+- **Limits**: Daily transaction limits and emergency controls
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -247,17 +227,22 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Links
+## 🆘 Support
 
-- **Website**: [Coming Soon]
-- **Documentation**: [Coming Soon]
-- **Discord**: [Coming Soon]
-- **Twitter**: [Coming Soon]
+- **Documentation**: [docs.btcminer.io](https://docs.btcminer.io)
+- **Discord**: [Join our community](https://discord.gg/btcminer)
+- **Twitter**: [@BTCMinerToken](https://twitter.com/BTCMinerToken)
+- **Email**: support@btcminer.io
 
-## ⚠️ Disclaimer
+## 🙏 Acknowledgments
 
-This software is in active development. Use at your own risk. Always do your own research before interacting with smart contracts or DeFi protocols.
+- LayerZero Labs for cross-chain infrastructure
+- Wormhole for Solana bridging
+- Internet Computer for decentralized identity
+- The amazing DeFi community
 
 ---
 
 **Built with ❤️ by the BTCMiner Team**
+
+*Empowering the future of multi-chain DeFi*

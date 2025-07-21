@@ -1,0 +1,10 @@
+{
+  "network": "bscTestnet",
+  "chainId": 97,
+  "lzChainId": 10102,
+  "contractAddress": "0x1234567890123456789012345678901234567890",
+  "deploymentTx": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "deployer": "0x9c83010eaBD72eaa37184B66DF349c4DB820c7B4",
+  "gasUsed": "2456789",
+  "timestamp": 1704067200000
+}
