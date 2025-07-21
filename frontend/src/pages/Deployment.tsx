@@ -1,9 +1,9 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  RocketLaunchIcon, 
-  CheckCircleIcon, 
-  XCircleIcon, 
+import {
+  RocketLaunchIcon,
+  CheckCircleIcon,
+  XCircleIcon,
   ClockIcon,
   FireIcon,
   LinkIcon,
@@ -17,13 +17,13 @@ import LoadingSpinner from '@components/common/LoadingSpinner'
 import { useDeployment, ChainStatus, LogEntry } from '@hooks/useDeployment'
 
 const Deployment: React.FC = () => {
-  const { 
-    chains, 
-    logs, 
-    isDeploying, 
-    stats, 
-    startDeployment, 
-    resetDeployment 
+  const {
+    chains,
+    logs,
+    isDeploying,
+    stats,
+    startDeployment,
+    resetDeployment
   } = useDeployment()
 
   // Copy contract address to clipboard
@@ -94,7 +94,7 @@ const Deployment: React.FC = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {typeof stat.value === 'number' && stat.label !== 'Total Time' ? (
-                      <AnimatedCounter end={stat.value} />
+                      <AnimatedCounter value={stat.value} decimals={0} />
                     ) : (
                       stat.value
                     )}
@@ -115,8 +115,8 @@ const Deployment: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             className={`
               px-8 py-3 rounded-lg font-semibold flex items-center space-x-2
-              ${isDeploying 
-                ? 'bg-gray-400 cursor-not-allowed' 
+              ${isDeploying
+                ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-orange-500 hover:bg-orange-600 text-white'
               }
               transition-colors duration-200
@@ -254,12 +254,11 @@ const Deployment: React.FC = () => {
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`mb-2 ${
-                    log.type === 'success' ? 'text-green-400' :
+                  className={`mb-2 ${log.type === 'success' ? 'text-green-400' :
                     log.type === 'error' ? 'text-red-400' :
-                    log.type === 'warning' ? 'text-yellow-400' :
-                    'text-blue-400'
-                  }`}
+                      log.type === 'warning' ? 'text-yellow-400' :
+                        'text-blue-400'
+                    }`}
                 >
                   <span className="text-gray-500">[{log.timestamp}]</span>{' '}
                   <span>{getLogIcon(log.type)} {log.message}</span>

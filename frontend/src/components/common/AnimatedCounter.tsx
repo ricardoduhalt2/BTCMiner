@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { motion, useAnimation, useInView } from 'framer-motion'
 
 interface AnimatedCounterProps {
-  value: number
+  value: number | string
   duration?: number
   decimals?: number
   prefix?: string
@@ -39,8 +39,17 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   useEffect(() => {
     if (!triggerAnimation || !isInView) return
 
+    // Convert value to number if it's a string
+    const numericValue = typeof value === 'string' ? parseFloat(value) || 0 : value
+    
+    // Safety check for invalid numbers
+    if (isNaN(numericValue)) {
+      setDisplayValue(0)
+      return
+    }
+
     const startValue = displayValue
-    const endValue = value
+    const endValue = numericValue
     const difference = endValue - startValue
     
     // Determine if value is increasing or decreasing
@@ -75,6 +84,11 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
   // Format the display value
   const formatDisplayValue = (val: number): string => {
+    // Safety check for undefined or null values
+    if (val === undefined || val === null || isNaN(val)) {
+      return '0'
+    }
+    
     if (formatValue) {
       return formatValue(val)
     }
@@ -96,7 +110,8 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
   // Color animation based on value change
   const getValueChangeColor = () => {
-    if (Math.abs(value - previousValue) < 0.001) return ''
+    const numericValue = typeof value === 'string' ? parseFloat(value) || 0 : value
+    if (Math.abs(numericValue - previousValue) < 0.001) return ''
     
     return isIncreasing 
       ? 'text-green-600 dark:text-green-400' 
@@ -108,7 +123,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
       ref={ref}
       className={`inline-block font-mono transition-colors duration-300 ${getValueChangeColor()} ${className}`}
       variants={containerVariants}
-      animate={triggerAnimation && Math.abs(value - previousValue) > 0.001 ? 'updating' : 'idle'}
+      animate={triggerAnimation && Math.abs((typeof value === 'string' ? parseFloat(value) || 0 : value) - previousValue) > 0.001 ? 'updating' : 'idle'}
     >
       {prefix}
       <motion.span
@@ -122,18 +137,21 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
       {suffix}
       
       {/* Subtle glow effect for significant changes */}
-      {Math.abs(value - previousValue) > (value * 0.1) && (
-        <motion.div
-          className={`absolute inset-0 rounded-md ${
-            isIncreasing 
-              ? 'bg-green-400/20' 
-              : 'bg-red-400/20'
-          }`}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.2, 1] }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        />
-      )}
+      {(() => {
+        const numericValue = typeof value === 'string' ? parseFloat(value) || 0 : value
+        return Math.abs(numericValue - previousValue) > (numericValue * 0.1) && (
+          <motion.div
+            className={`absolute inset-0 rounded-md ${
+              isIncreasing 
+                ? 'bg-green-400/20' 
+                : 'bg-red-400/20'
+            }`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.2, 1] }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        )
+      })()}
     </motion.span>
   )
 }
