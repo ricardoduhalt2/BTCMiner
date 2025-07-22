@@ -7,7 +7,11 @@
 export const cleanupPersistentThemeElements = () => {
   if (typeof document === 'undefined') return 0
 
-  console.log('🧹 Limpiando elementos persistentes de tema...')
+  const debugEnabled = process.env.NODE_ENV === 'development' && localStorage.getItem('debug-theme') === 'true'
+  
+  if (debugEnabled) {
+    console.log('🧹 Limpiando elementos persistentes de tema...')
+  }
   
   let removedCount = 0
   
@@ -24,7 +28,9 @@ export const cleanupPersistentThemeElements = () => {
     try {
       const elements = document.querySelectorAll(selector)
       elements.forEach(element => {
-        console.log(`🗑️ Eliminando elemento persistente: ${selector}`)
+        if (debugEnabled) {
+          console.log(`🗑️ Eliminando elemento persistente: ${selector}`)
+        }
         element.remove()
         removedCount++
       })
@@ -53,7 +59,9 @@ export const cleanupPersistentThemeElements = () => {
         )
         
         if (isFloating) {
-          console.log(`🗑️ Eliminando contenido persistente: "${textContent}"`)
+          if (debugEnabled) {
+            console.log(`🗑️ Eliminando contenido persistente: "${textContent}"`)
+          }
           element.remove()
           removedCount++
         }
@@ -68,13 +76,15 @@ export const cleanupPersistentThemeElements = () => {
   framerElements.forEach(element => {
     const textContent = element.textContent || ''
     if (textContent.includes('🌙') || textContent.includes('Dark Mode')) {
-      console.log('🗑️ Eliminando elemento Framer Motion huérfano con contenido de tema')
+      if (debugEnabled) {
+        console.log('🗑️ Eliminando elemento Framer Motion huérfano con contenido de tema')
+      }
       element.remove()
       removedCount++
     }
   })
   
-  if (removedCount > 0) {
+  if (removedCount > 0 && debugEnabled) {
     console.log(`✅ Limpieza completada: ${removedCount} elementos persistentes eliminados`)
   }
   
@@ -84,6 +94,8 @@ export const cleanupPersistentThemeElements = () => {
 // Función de verificación para confirmar que no hay elementos persistentes
 export const verifyNoPersistentElements = () => {
   if (typeof document === 'undefined') return true
+  
+  const debugEnabled = process.env.NODE_ENV === 'development' && localStorage.getItem('debug-theme') === 'true'
   
   const problematicSelectors = [
     '[data-theme-transition="indicator"]',
@@ -96,7 +108,9 @@ export const verifyNoPersistentElements = () => {
   problematicSelectors.forEach(selector => {
     const elements = document.querySelectorAll(selector)
     if (elements.length > 0) {
-      console.warn(`⚠️ Elementos persistentes encontrados: ${selector} (${elements.length})`)
+      if (debugEnabled) {
+        console.warn(`⚠️ Elementos persistentes encontrados: ${selector} (${elements.length})`)
+      }
       foundPersistent = true
     }
   })
@@ -107,12 +121,14 @@ export const verifyNoPersistentElements = () => {
     const textContent = element.textContent?.trim() || ''
     if ((textContent === '🌙' || textContent === 'Dark Mode') && 
         window.getComputedStyle(element).position === 'fixed') {
-      console.warn(`⚠️ Elemento persistente con contenido: "${textContent}"`)
+      if (debugEnabled) {
+        console.warn(`⚠️ Elemento persistente con contenido: "${textContent}"`)
+      }
       foundPersistent = true
     }
   })
   
-  if (!foundPersistent) {
+  if (!foundPersistent && debugEnabled) {
     console.log('✅ Verificación exitosa: No se encontraron elementos persistentes')
   }
   

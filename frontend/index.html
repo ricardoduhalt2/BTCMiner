@@ -3,10 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logoBTCMINER.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <meta name="description" content="BTCMiner - Advanced Multi-Chain Token Management Platform" />
     <meta name="keywords" content="BTCMiner, DeFi, Cross-Chain, Ethereum, Solana, BNB Chain, Base" />
     <meta name="author" content="BTCMiner Team" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="BTCMiner" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BTCMiner" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#f97316" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="theme-color" content="#f97316" />
+    
+    <!-- Touch Icons -->
+    <link rel="apple-touch-icon" href="/logoBTCMINER.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/logoBTCMINER.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logoBTCMINER.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/logoBTCMINER.png" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Prevent zoom on input focus (iOS) -->
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Performance hints -->
+    <link rel="dns-prefetch" href="//api.btcminer.com" />
+    <link rel="preconnect" href="https://api.btcminer.com" crossorigin />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -37,5 +63,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

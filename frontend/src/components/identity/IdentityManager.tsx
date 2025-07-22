@@ -205,8 +205,12 @@ const IdentityManager: React.FC<IdentityManagerProps> = ({ onClose }) => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center"
         >
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <UserCircleIcon className="h-8 w-8 text-white" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden">
+            <img 
+              src="/identity-loader.svg" 
+              alt="Identity Loader" 
+              className="w-full h-full object-contain"
+            />
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
@@ -269,8 +273,12 @@ const IdentityManager: React.FC<IdentityManagerProps> = ({ onClose }) => {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <UserCircleIcon className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden">
+              <img 
+                src="/identity-loader.svg" 
+                alt="Identity" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center space-x-3">

@@ -14,6 +14,7 @@ import {
 import AnimatedPage from '@components/common/AnimatedPage'
 import AnimatedCounter from '@components/common/AnimatedCounter'
 import LoadingSpinner from '@components/common/LoadingSpinner'
+import ChainLogo from '@components/common/ChainLogo'
 import { useDeployment, ChainStatus, LogEntry } from '@hooks/useDeployment'
 
 const Deployment: React.FC = () => {
@@ -160,7 +161,7 @@ const Deployment: React.FC = () => {
               {/* Chain Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{chain.emoji}</span>
+                  <ChainLogo chain={chain.emoji} size="lg" />
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">{chain.name}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">{chain.status}</p>

@@ -6,7 +6,7 @@
       "main": "src/identity/main.mo"
     },
     "btcminer_price_monitor": {
-      "type": "motoko", 
+      "type": "motoko",
       "main": "src/price_monitor/main.mo"
     },
     "btcminer_liquidity_health": {
@@ -15,7 +15,9 @@
     },
     "btcminer_frontend": {
       "type": "assets",
-      "source": ["frontend/"]
+      "source": [
+        "frontend/"
+      ]
     }
   },
   "networks": {
@@ -24,7 +26,9 @@
       "type": "ephemeral"
     },
     "ic": {
-      "providers": ["https://icp0.io"],
+      "providers": [
+        "https://icp0.io"
+      ],
       "type": "persistent"
     }
   },

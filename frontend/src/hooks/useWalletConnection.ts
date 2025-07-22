@@ -10,7 +10,7 @@ import {
   updateWalletChain,
   clearError,
 } from '@store/slices/walletSlice'
-import { addNotification } from '@store/slices/uiSlice'
+import { addNotification } from '@store/slices/notificationSlice'
 import { WalletType, ConnectedWallet, WalletError } from '@types/wallet'
 import { walletManager } from '@services/walletManager'
 
@@ -60,7 +60,9 @@ export const useWalletConnection = () => {
       if (!existingWallet) {
         dispatch(connectWalletSuccess(wallet))
         dispatch(addNotification({
-          type: 'success',
+          type: 'system',
+          priority: 'medium',
+          title: 'Wallet Connected',
           message: `${wallet.type.charAt(0).toUpperCase() + wallet.type.slice(1)} wallet connected successfully!`
         }))
       }
@@ -79,7 +81,9 @@ export const useWalletConnection = () => {
       }
       
       dispatch(addNotification({
-        type: 'info',
+        type: 'system',
+        priority: 'low',
+        title: 'Wallet Disconnected',
         message: 'Wallet disconnected'
       }))
     }
@@ -93,7 +97,9 @@ export const useWalletConnection = () => {
         })
         
         dispatch(addNotification({
-          type: 'warning',
+          type: 'security',
+          priority: 'medium',
+          title: 'Accounts Disconnected',
           message: `${data.walletType} accounts disconnected`
         }))
       }
@@ -119,7 +125,9 @@ export const useWalletConnection = () => {
       }
       
       dispatch(addNotification({
-        type: 'info',
+        type: 'system',
+        priority: 'low',
+        title: 'Network Switched',
         message: `Network switched to chain ${data.chainId}`
       }))
     }
@@ -181,7 +189,9 @@ export const useWalletConnection = () => {
       
       dispatch(connectWalletFailure(errorMessage))
       dispatch(addNotification({
-        type: 'error',
+        type: 'security',
+        priority: 'high',
+        title: 'Wallet Connection Failed',
         message: errorMessage
       }))
     }
@@ -194,7 +204,9 @@ export const useWalletConnection = () => {
     } catch (error: any) {
       console.error('Failed to disconnect wallet:', error)
       dispatch(addNotification({
-        type: 'error',
+        type: 'system',
+        priority: 'medium',
+        title: 'Disconnect Failed',
         message: 'Failed to disconnect wallet'
       }))
     }
@@ -204,13 +216,17 @@ export const useWalletConnection = () => {
     try {
       await walletManager.disconnectAllWallets()
       dispatch(addNotification({
-        type: 'info',
+        type: 'system',
+        priority: 'low',
+        title: 'All Wallets Disconnected',
         message: 'All wallets disconnected'
       }))
     } catch (error: any) {
       console.error('Failed to disconnect all wallets:', error)
       dispatch(addNotification({
-        type: 'error',
+        type: 'system',
+        priority: 'high',
+        title: 'Disconnect All Failed',
         message: 'Failed to disconnect all wallets'
       }))
     }
@@ -237,7 +253,9 @@ export const useWalletConnection = () => {
       }
       
       dispatch(addNotification({
-        type: 'error',
+        type: 'system',
+        priority: 'medium',
+        title: 'Network Switch Failed',
         message: errorMessage
       }))
     }
@@ -247,7 +265,9 @@ export const useWalletConnection = () => {
     try {
       const signature = await walletManager.signMessage(walletId, message)
       dispatch(addNotification({
-        type: 'success',
+        type: 'system',
+        priority: 'medium',
+        title: 'Message Signed',
         message: 'Message signed successfully'
       }))
       return signature
@@ -268,7 +288,9 @@ export const useWalletConnection = () => {
       }
       
       dispatch(addNotification({
-        type: 'error',
+        type: 'system',
+        priority: 'high',
+        title: 'Message Signing Failed',
         message: errorMessage
       }))
       return null

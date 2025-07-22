@@ -12,8 +12,6 @@ const WalletModalSimple: React.FC<WalletModalSimpleProps> = ({ isOpen, onClose }
   const { connectWallet, isConnecting } = useWalletConnection()
   const [connectingWallet, setConnectingWallet] = useState<string | null>(null)
 
-  console.log('🔧 WalletModal: isOpen =', isOpen)
-
   const walletOptions = [
     {
       id: 'metamask',
@@ -46,7 +44,6 @@ const WalletModalSimple: React.FC<WalletModalSimpleProps> = ({ isOpen, onClose }
   ]
 
   const handleConnect = async (walletType: string) => {
-    console.log('🔧 Connecting to wallet:', walletType)
     try {
       setConnectingWallet(walletType)
       await connectWallet(walletType as any)
@@ -65,11 +62,8 @@ const WalletModalSimple: React.FC<WalletModalSimpleProps> = ({ isOpen, onClose }
 
   // Don't render anything if not open
   if (!isOpen) {
-    console.log('🔧 Modal not open, not rendering')
     return null
   }
-
-  console.log('🔧 Modal is open, rendering...')
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-50">

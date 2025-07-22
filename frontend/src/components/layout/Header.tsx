@@ -11,7 +11,7 @@ import {
 import { useWalletConnection } from '@hooks/useWalletConnection'
 import { useAppSelector } from '@hooks/redux'
 import NetworkSelector from '@components/common/NetworkSelector'
-import NotificationDropdown from '@components/common/NotificationDropdown'
+import { NotificationDropdown } from '@components/common/NotificationDropdown'
 import WalletConnectorFixed from '@components/wallet/WalletConnectorFixed'
 import ThemeToggle from '@components/common/ThemeToggle'
 
@@ -23,10 +23,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick, sidebarOpen }) => {
   const location = useLocation()
   const { connectedWallets } = useWalletConnection()
-  const { notifications } = useAppSelector(state => state.ui)
+  const { unreadCount } = useAppSelector(state => state.notifications)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-
-  const unreadNotifications = notifications.filter((n: any) => !n.read).length
 
   const getPageTitle = () => {
     const path = location.pathname
@@ -124,13 +122,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, sidebarOpen }) => {
             {/* Notifications */}
             <div className="relative">
               <NotificationDropdown />
-              {unreadNotifications > 0 && (
+              {unreadCount > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"
                 >
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </motion.div>
               )}
             </div>

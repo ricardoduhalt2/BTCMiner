@@ -1,101 +1,100 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { BtcminerSolana } from "../solana/target/types/btcminer_solana";
-import { 
+import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createMint,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 import * as fs from "fs";
+import * as path from "path";
 
-// Wormhole bridge addresses
-const WORMHOLE_BRIDGES = {
-  devnet: "3u8hJUVTA4jH1wYAyUur7FFZVQ8H635K3tSHHF4ssjQ5",
-  mainnet: "worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth"
-};
-
-interface SolanaDeploymentInfo {
+interface SolanaDeploymentResult {
   network: string;
   programId: string;
-  mintAddress: string;
-  configAddress: string;
+  configPda: string;
+  mint: string;
   authorityTokenAccount: string;
-  authority: string;
-  wormholeBridge: string;
-  initialSupply: string;
-  timestamp: string;
+  deploymentTx: string;
+  initializeTx: string;
+  deployer: string;
+  timestamp: number;
+  cluster: string;
 }
 
 async function main() {
-  console.log("🌟 BTCMiner Solana Deployment Starting...");
-  console.log("==========================================");
+  console.log("🚀 BTCMiner Solana Program Deployment");
+  console.log("=====================================");
 
-  // Set up provider and program
+  // Configure the client
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  
+
   const program = anchor.workspace.BtcminerSolana as Program<BtcminerSolana>;
   const authority = provider.wallet as anchor.Wallet;
-  
-  console.log("Program ID:", program.programId.toString());
-  console.log("Authority:", authority.publicKey.toString());
-  console.log("Network:", provider.connection.rpcEndpoint);
 
-  // Determine network
-  const isDevnet = provider.connection.rpcEndpoint.includes("devnet");
-  const network = isDevnet ? "devnet" : "mainnet";
-  const wormholeBridge = new anchor.web3.PublicKey(
-    WORMHOLE_BRIDGES[network as keyof typeof WORMHOLE_BRIDGES]
+  console.log(`📍 Cluster: ${provider.connection.rpcEndpoint}`);
+  console.log(`🆔 Program ID: ${program.programId.toString()}`);
+  console.log(`👤 Authority: ${authority.publicKey.toString()}`);
+
+  // Check SOL balance
+  const balance = await provider.connection.getBalance(authority.publicKey);
+  console.log(`💰 SOL Balance: ${balance / anchor.web3.LAMPORTS_PER_SOL} SOL`);
+
+  if (balance < 0.1 * anchor.web3.LAMPORTS_PER_SOL) {
+    throw new Error("Insufficient SOL balance. Need at least 0.1 SOL for deployment.");
+  }
+
+  // Find config PDA
+  const [configPda, configBump] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("config")],
+    program.programId
   );
 
-  console.log("Deploying to:", network);
-  console.log("Wormhole Bridge:", wormholeBridge.toString());
+  console.log(`🔑 Config PDA: ${configPda.toString()}`);
+  console.log(`🔢 Config Bump: ${configBump}`);
 
+  // Create mint
+  console.log("\n📦 Creating BTCMiner SPL Token...");
+  const mint = await createMint(
+    provider.connection,
+    authority.payer,
+    configPda, // Mint authority will be the config PDA
+    null, // Freeze authority
+    9, // 9 decimals
+    undefined, // Keypair (let it generate)
+    undefined, // Confirm options
+    TOKEN_PROGRAM_ID
+  );
+
+  console.log(`🪙 Mint Address: ${mint.toString()}`);
+
+  // Create associated token account for authority
+  const authorityTokenAccount = await getAssociatedTokenAddress(
+    mint,
+    authority.publicKey
+  );
+
+  console.log(`💼 Authority Token Account: ${authorityTokenAccount.toString()}`);
+
+  // Configuration parameters
+  const WORMHOLE_BRIDGE = new anchor.web3.PublicKey("worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth"); // Devnet Wormhole
+  const INITIAL_SUPPLY = new anchor.BN(100_000_000 * 10**9); // 100M tokens with 9 decimals
+
+  console.log(`🌉 Wormhole Bridge: ${WORMHOLE_BRIDGE.toString()}`);
+  console.log(`💎 Initial Supply: ${INITIAL_SUPPLY.toString()} (100M BTCM)`);
+
+  // Initialize the program
+  console.log("\n🔧 Initializing BTCMiner Program...");
+  
   try {
-    // Check authority balance
-    const balance = await provider.connection.getBalance(authority.publicKey);
-    console.log("Authority balance:", balance / anchor.web3.LAMPORTS_PER_SOL, "SOL");
-    
-    if (balance < 0.1 * anchor.web3.LAMPORTS_PER_SOL) {
-      throw new Error("Insufficient SOL balance. Need at least 0.1 SOL for deployment.");
-    }
-
-    // Create mint for BTCMiner token
-    console.log("\n📝 Creating BTCMiner SPL Token...");
-    const mint = await createMint(
-      provider.connection,
-      authority.payer,
-      authority.publicKey, // mint authority
-      null, // freeze authority (none)
-      9 // decimals
-    );
-    console.log("✅ Mint created:", mint.toString());
-
-    // Find config PDA
-    const [config, configBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("config")],
-      program.programId
-    );
-    console.log("Config PDA:", config.toString());
-
-    // Get authority token account
-    const authorityTokenAccount = await getAssociatedTokenAddress(
-      mint,
-      authority.publicKey
-    );
-    console.log("Authority token account:", authorityTokenAccount.toString());
-
-    // Initialize the program
-    console.log("\n🚀 Initializing BTCMiner Program...");
-    const initialSupply = new anchor.BN(100_000_000 * 10**9); // 100M tokens with 9 decimals
-    
-    const tx = await program.methods
-      .initialize(wormholeBridge, initialSupply)
+    const initTx = await program.methods
+      .initialize(WORMHOLE_BRIDGE, INITIAL_SUPPLY)
       .accounts({
-        config,
-        mint,
-        authorityTokenAccount,
+        config: configPda,
+        mint: mint,
+        authorityTokenAccount: authorityTokenAccount,
         authority: authority.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -103,76 +102,139 @@ async function main() {
       })
       .rpc();
 
-    console.log("✅ Program initialized!");
-    console.log("Transaction signature:", tx);
+    console.log(`✅ Initialization Transaction: ${initTx}`);
 
     // Verify initialization
-    const configAccount = await program.account.config.fetch(config);
-    console.log("\n📊 Program Configuration:");
-    console.log("Authority:", configAccount.authority.toString());
-    console.log("Wormhole Bridge:", configAccount.wormholeBridge.toString());
-    console.log("Total Burned:", configAccount.totalBurned.toString());
-    console.log("Total Minted:", configAccount.totalMinted.toString());
-    console.log("Daily Burn Limit:", configAccount.dailyBurnLimit.toString());
-    console.log("Paused:", configAccount.paused);
+    console.log("\n🔍 Verifying Deployment...");
+    const config = await program.account.config.fetch(configPda);
+    
+    console.log(`✅ Authority: ${config.authority.toString()}`);
+    console.log(`✅ Wormhole Bridge: ${config.wormholebridge.toString()}`);
+    console.log(`✅ Total Burned: ${config.totalBurned.toString()}`);
+    console.log(`✅ Total Minted: ${config.totalMinted.toString()}`);
+    console.log(`✅ Daily Burn Limit: ${config.dailyBurnLimit.toString()}`);
+    console.log(`✅ Paused: ${config.paused}`);
 
-    // Save deployment info
-    const deploymentInfo: SolanaDeploymentInfo = {
-      network,
+    // Check token supply
+    const mintInfo = await provider.connection.getParsedAccountInfo(mint);
+    if (mintInfo.value?.data && 'parsed' in mintInfo.value.data) {
+      const supply = mintInfo.value.data.parsed.info.supply;
+      console.log(`✅ Token Supply: ${supply} (${supply / 10**9} BTCM)`);
+    }
+
+    // Save deployment information
+    const deploymentResult: SolanaDeploymentResult = {
+      network: "solana",
       programId: program.programId.toString(),
-      mintAddress: mint.toString(),
-      configAddress: config.toString(),
+      configPda: configPda.toString(),
+      mint: mint.toString(),
       authorityTokenAccount: authorityTokenAccount.toString(),
-      authority: authority.publicKey.toString(),
-      wormholeBridge: wormholeBridge.toString(),
-      initialSupply: initialSupply.toString(),
-      timestamp: new Date().toISOString()
+      deploymentTx: "N/A", // Program deployment handled by Anchor
+      initializeTx: initTx,
+      deployer: authority.publicKey.toString(),
+      timestamp: Date.now(),
+      cluster: provider.connection.rpcEndpoint.includes("devnet") ? "devnet" : 
+               provider.connection.rpcEndpoint.includes("mainnet") ? "mainnet" : "localnet"
     };
 
-    const deploymentsFile = "solana-deployments.json";
-    let existingDeployments: SolanaDeploymentInfo[] = [];
-    
-    if (fs.existsSync(deploymentsFile)) {
-      const fileContent = fs.readFileSync(deploymentsFile, "utf8");
-      existingDeployments = JSON.parse(fileContent);
+    // Create deployments directory if it doesn't exist
+    const deploymentsDir = path.join(__dirname, "..", "deployments");
+    if (!fs.existsSync(deploymentsDir)) {
+      fs.mkdirSync(deploymentsDir, { recursive: true });
     }
 
-    // Update or add new deployment
-    const existingIndex = existingDeployments.findIndex(d => d.network === network);
-    if (existingIndex >= 0) {
-      existingDeployments[existingIndex] = deploymentInfo;
-    } else {
-      existingDeployments.push(deploymentInfo);
-    }
+    // Save deployment file
+    const deploymentFile = path.join(deploymentsDir, "solana-deployment.json");
+    fs.writeFileSync(deploymentFile, JSON.stringify(deploymentResult, null, 2));
 
-    fs.writeFileSync(deploymentsFile, JSON.stringify(existingDeployments, null, 2));
-    console.log(`\n💾 Deployment info saved to ${deploymentsFile}`);
+    console.log(`\n💾 Deployment info saved to: ${deploymentFile}`);
 
-    console.log("\n🎉 Solana Deployment Summary:");
-    console.log("=============================");
-    console.log(`Network: ${network}`);
-    console.log(`Program ID: ${program.programId.toString()}`);
-    console.log(`Mint Address: ${mint.toString()}`);
-    console.log(`Config Address: ${config.toString()}`);
-    console.log(`Initial Supply: ${(Number(initialSupply) / 10**9).toLocaleString()} BTCM`);
+    // Display summary
+    console.log("\n🎯 DEPLOYMENT SUMMARY");
+    console.log("====================");
+    console.log(`📍 Cluster: ${deploymentResult.cluster}`);
+    console.log(`🆔 Program ID: ${deploymentResult.programId}`);
+    console.log(`🔑 Config PDA: ${deploymentResult.configPda}`);
+    console.log(`🪙 Mint: ${deploymentResult.mint}`);
+    console.log(`💼 Authority Token Account: ${deploymentResult.authorityTokenAccount}`);
+    console.log(`📋 Init Transaction: ${deploymentResult.initializeTx}`);
 
-    console.log("\n📋 Next Steps:");
-    console.log("1. Test cross-chain burn functionality");
-    console.log("2. Set up Wormhole message handling");
-    console.log("3. Configure cross-chain communication with EVM chains");
-    console.log("4. Deploy frontend integration for Solana wallet support");
+    console.log("\n🔗 Explorer Links:");
+    const explorerBase = deploymentResult.cluster === "mainnet" 
+      ? "https://explorer.solana.com" 
+      : `https://explorer.solana.com?cluster=${deploymentResult.cluster}`;
     
-    console.log("\n✨ Solana deployment complete! Ready for cross-chain magic! 🌉");
+    console.log(`🆔 Program: ${explorerBase}/address/${deploymentResult.programId}`);
+    console.log(`🪙 Token: ${explorerBase}/address/${deploymentResult.mint}`);
+    console.log(`📋 Transaction: ${explorerBase}/tx/${deploymentResult.initializeTx}`);
+
+    console.log("\n🧪 Testing Commands:");
+    console.log("===================");
+    console.log("# Run tests");
+    console.log("anchor test");
+    console.log("");
+    console.log("# Test cross-chain burn");
+    console.log(`anchor run test-burn --provider.cluster ${deploymentResult.cluster}`);
+    console.log("");
+    console.log("# Check program logs");
+    console.log(`solana logs ${deploymentResult.programId} --url ${provider.connection.rpcEndpoint}`);
+
+    console.log("\n🎯 Next Steps:");
+    console.log("==============");
+    console.log("1. Test cross-chain functionality");
+    console.log("2. Add trusted emitters for EVM chains");
+    console.log("3. Configure Pyth price feeds");
+    console.log("4. Deploy ICP canisters (Task 1.6)");
+    console.log("5. Integrate with frontend");
+
+    return deploymentResult;
 
   } catch (error) {
     console.error("❌ Deployment failed:", error);
-    process.exit(1);
+    
+    // Check if it's an account already exists error
+    if (error.message?.includes("already in use")) {
+      console.log("\n💡 Program may already be initialized. Checking existing deployment...");
+      
+      try {
+        const config = await program.account.config.fetch(configPda);
+        console.log("✅ Found existing deployment:");
+        console.log(`   Authority: ${config.authority.toString()}`);
+        console.log(`   Mint Authority: ${configPda.toString()}`);
+        console.log(`   Total Supply: ${config.totalMinted.toString()}`);
+        
+        return {
+          network: "solana",
+          programId: program.programId.toString(),
+          configPda: configPda.toString(),
+          mint: mint.toString(),
+          authorityTokenAccount: authorityTokenAccount.toString(),
+          deploymentTx: "existing",
+          initializeTx: "existing",
+          deployer: authority.publicKey.toString(),
+          timestamp: Date.now(),
+          cluster: provider.connection.rpcEndpoint.includes("devnet") ? "devnet" : "localnet"
+        };
+      } catch (fetchError) {
+        console.error("❌ Could not fetch existing config:", fetchError);
+      }
+    }
+    
+    throw error;
   }
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+// Handle script execution
+if (require.main === module) {
+  main()
+    .then(() => {
+      console.log("\n🎉 Solana deployment completed successfully!");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("❌ Solana deployment failed:", error);
+      process.exit(1);
+    });
+}
+
+export { main as deploySolana };

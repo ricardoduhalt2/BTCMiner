@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.7"
+  },
+  "scripts": {
+    "supabase:types": "supabase gen types typescript --project-id tvnmsaqpyrsbauodpfrh > src/types/supabase.ts",
+    "supabase:reset": "supabase db reset",
+    "supabase:migrate": "supabase db push"
+  }
+}

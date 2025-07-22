@@ -7,7 +7,11 @@ import Footer from './Footer'
 import Breadcrumbs from './Breadcrumbs'
 import NavigationProgress from './NavigationProgress'
 import NavigationIndicator from './NavigationIndicator'
+import { MobileNavigation } from '../common/MobileNavigation'
 import { useAppSelector } from '@hooks/redux'
+import { useMobileDetection } from '@hooks/useMobileDetection'
+import { useSystemPreferences } from '@hooks/useSystemPreferences'
+import { useMobilePerformance } from '@hooks/useMobilePerformance'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -17,6 +21,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const { theme } = useAppSelector(state => state.ui)
+  const { isMobile, isTouchDevice } = useMobileDetection()
+  const { prefersReducedMotion, saveData } = useSystemPreferences()
+  const { optimizations } = useMobilePerformance()
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -70,9 +77,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    } ${isTouchDevice ? 'touch-manipulation' : ''}`}>
       {/* Navigation Progress Indicator */}
-      <NavigationProgress />
+      {!saveData && <NavigationProgress />}
       
       <Header 
         onMenuClick={() => setSidebarOpen(true)}
@@ -80,48 +87,65 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       />
       
       <div className="flex pt-16">
-        <Sidebar 
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <Sidebar 
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        )}
         
-        <main className="flex-1 lg:ml-64 min-h-[calc(100vh-4rem)]">
+        {/* Mobile Navigation */}
+        {isMobile && (
+          <MobileNavigation
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        )}
+        
+        <main className={`flex-1 ${!isMobile ? 'lg:ml-64' : ''} min-h-[calc(100vh-4rem)]`}>
           <div className="flex flex-col min-h-full">
             {/* Breadcrumbs */}
-            {shouldShowBreadcrumbs() && (
+            {shouldShowBreadcrumbs() && !isMobile && (
               <div className="px-4 sm:px-6 lg:px-8 py-4 border-b border-gray-200 dark:border-gray-700">
                 <Breadcrumbs />
               </div>
             )}
 
             {/* Main Content */}
-            <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+            <div className={`flex-1 px-4 sm:px-6 lg:px-8 ${isMobile ? 'py-4' : 'py-8'}`}>
               <motion.div
                 key={location.pathname}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
+                initial={prefersReducedMotion || optimizations.shouldReduceAnimations ? false : { opacity: 0, y: 20 }}
+                animate={prefersReducedMotion || optimizations.shouldReduceAnimations ? false : { opacity: 1, y: 0 }}
+                exit={prefersReducedMotion || optimizations.shouldReduceAnimations ? false : { opacity: 0, y: -20 }}
+                transition={
+                  prefersReducedMotion || optimizations.shouldReduceAnimations 
+                    ? { duration: 0 } 
+                    : { duration: optimizations.shouldLimitUpdates ? 0.15 : 0.3 }
+                }
               >
                 {children}
               </motion.div>
             </div>
 
-            {/* Footer */}
-            <Footer />
+            {/* Footer - Hidden on mobile to save space */}
+            {!isMobile && <Footer />}
           </div>
         </main>
       </div>
 
-      {/* Navigation Indicator */}
-      <NavigationIndicator />
+      {/* Navigation Indicator - Only on desktop */}
+      {!isMobile && <NavigationIndicator />}
 
       {/* Loading overlay for theme transitions */}
-      <motion.div
-        initial={false}
-        animate={{ opacity: 0 }}
-        className="fixed inset-0 bg-white dark:bg-gray-900 pointer-events-none z-50"
-      />
+      {!prefersReducedMotion && (
+        <motion.div
+          initial={false}
+          animate={{ opacity: 0 }}
+          className="fixed inset-0 bg-white dark:bg-gray-900 pointer-events-none z-50"
+        />
+      )}
     </div>
   )
 }

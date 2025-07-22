@@ -1,235 +1,153 @@
-import React, { useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useState } from 'react';
+import { useAppSelector, useAppDispatch } from '../../hooks/redux';
+import { deleteNotification } from '../../store/slices/notificationSlice';
 import { 
-  CheckCircleIcon,
+  CheckCircleIcon, 
+  ExclamationTriangleIcon, 
+  InformationCircleIcon, 
   XCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline'
-import { useAppSelector, useAppDispatch } from '@hooks/redux'
-import { removeNotification } from '@store/slices/uiSlice'
-import { useAnimation } from './AnimationProvider'
+  XMarkIcon 
+} from '@heroicons/react/24/outline';
+import { Transition } from '@headlessui/react';
 
 interface ToastProps {
-  id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  message: string
-  duration?: number
-  onClose: (id: string) => void
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  duration?: number;
+  onClose: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ id, type, message, duration = 5000, onClose }) => {
-  const { isAnimated } = useAnimation()
+const Toast: React.FC<ToastProps> = ({ 
+  id, 
+  type, 
+  title, 
+  message, 
+  duration = 5000, 
+  onClose 
+}) => {
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose(id)
-    }, duration)
+      setIsVisible(false);
+      setTimeout(onClose, 300); // Wait for animation to complete
+    }, duration);
 
-    return () => clearTimeout(timer)
-  }, [id, duration, onClose])
+    return () => clearTimeout(timer);
+  }, [duration, onClose]);
 
   const getIcon = () => {
-    const iconProps = "h-6 w-6"
     switch (type) {
       case 'success':
-        return <CheckCircleIcon className={`${iconProps} text-green-500`} />
+        return <CheckCircleIcon className="h-6 w-6 text-green-400" />;
       case 'error':
-        return <XCircleIcon className={`${iconProps} text-red-500`} />
+        return <XCircleIcon className="h-6 w-6 text-red-400" />;
       case 'warning':
-        return <ExclamationTriangleIcon className={`${iconProps} text-yellow-500`} />
+        return <ExclamationTriangleIcon className="h-6 w-6 text-yellow-400" />;
       case 'info':
-      default:
-        return <InformationCircleIcon className={`${iconProps} text-blue-500`} />
+        return <InformationCircleIcon className="h-6 w-6 text-blue-400" />;
     }
-  }
+  };
 
-  const getStyles = () => {
+  const getBackgroundColor = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+        return 'bg-green-50 border-green-200';
       case 'error':
-        return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+        return 'bg-red-50 border-red-200';
       case 'warning':
-        return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+        return 'bg-yellow-50 border-yellow-200';
       case 'info':
-      default:
-        return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+        return 'bg-blue-50 border-blue-200';
     }
-  }
-
-  const toastVariants = {
-    initial: { 
-      opacity: 0, 
-      x: 300, 
-      scale: 0.8,
-      rotateY: 90
-    },
-    animate: { 
-      opacity: 1, 
-      x: 0, 
-      scale: 1,
-      rotateY: 0,
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 20
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      x: 300, 
-      scale: 0.8,
-      rotateY: -90,
-      transition: {
-        duration: 0.3
-      }
-    }
-  }
-
-  const progressVariants = {
-    initial: { width: '100%' },
-    animate: { 
-      width: '0%',
-      transition: {
-        duration: duration / 1000,
-        ease: 'linear'
-      }
-    }
-  }
+  };
 
   return (
-    <motion.div
-      variants={isAnimated ? toastVariants : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className={`
-        relative max-w-sm w-full rounded-lg shadow-lg border p-4 mb-4
-        ${getStyles()}
-        hover-lift transition-all duration-200
-      `}
-      whileHover={isAnimated ? { scale: 1.02, x: -5 } : {}}
-      style={{ perspective: '1000px' }}
+    <Transition
+      show={isVisible}
+      enter="transform ease-out duration-300 transition"
+      enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enterTo="translate-y-0 opacity-100 sm:translate-x-0"
+      leave="transition ease-in duration-100"
+      leaveFrom="opacity-100"
+      leaveTo="opacity-0"
     >
-      <div className="flex items-start space-x-3">
-        <motion.div
-          animate={isAnimated ? {
-            rotate: [0, 10, -10, 0],
-            scale: [1, 1.1, 1]
-          } : {}}
-          transition={isAnimated ? {
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          } : {}}
-        >
-          {getIcon()}
-        </motion.div>
-        
-        <div className="flex-1 min-w-0">
-          <motion.p 
-            className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-relaxed"
-            initial={isAnimated ? { opacity: 0, y: 5 } : {}}
-            animate={isAnimated ? { opacity: 1, y: 0 } : {}}
-            transition={isAnimated ? { delay: 0.1 } : {}}
-          >
-            {message}
-          </motion.p>
+      <div className={`max-w-sm w-full shadow-lg rounded-lg pointer-events-auto border ${getBackgroundColor()}`}>
+        <div className="p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {getIcon()}
+            </div>
+            <div className="ml-3 w-0 flex-1 pt-0.5">
+              <p className="text-sm font-medium text-gray-900">{title}</p>
+              <p className="mt-1 text-sm text-gray-500">{message}</p>
+            </div>
+            <div className="ml-4 flex-shrink-0 flex">
+              <button
+                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => {
+                  setIsVisible(false);
+                  setTimeout(onClose, 300);
+                }}
+              >
+                <span className="sr-only">Close</span>
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
-        
-        <motion.button
-          onClick={() => onClose(id)}
-          className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md transition-colors"
-          whileHover={isAnimated ? { scale: 1.1, rotate: 90 } : {}}
-          whileTap={isAnimated ? { scale: 0.9 } : {}}
-        >
-          <XMarkIcon className="h-4 w-4" />
-        </motion.button>
       </div>
-      
-      {/* Progress Bar */}
-      <motion.div
-        className="absolute bottom-0 left-0 h-1 bg-current opacity-30 rounded-b-lg"
-        variants={isAnimated ? progressVariants : {}}
-        initial="initial"
-        animate="animate"
-        style={{
-          color: type === 'success' ? '#10b981' : 
-                 type === 'error' ? '#ef4444' : 
-                 type === 'warning' ? '#f59e0b' : '#3b82f6'
-        }}
-      />
-      
-      {/* Glow Effect */}
-      {isAnimated && (
-        <motion.div
-          className="absolute inset-0 rounded-lg pointer-events-none"
-          animate={{
-            boxShadow: [
-              `0 0 0 0 ${type === 'success' ? 'rgba(16, 185, 129, 0)' : 
-                         type === 'error' ? 'rgba(239, 68, 68, 0)' : 
-                         type === 'warning' ? 'rgba(245, 158, 11, 0)' : 'rgba(59, 130, 246, 0)'}`,
-              `0 0 20px 0 ${type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 
-                            type === 'error' ? 'rgba(239, 68, 68, 0.2)' : 
-                            type === 'warning' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)'}`,
-              `0 0 0 0 ${type === 'success' ? 'rgba(16, 185, 129, 0)' : 
-                         type === 'error' ? 'rgba(239, 68, 68, 0)' : 
-                         type === 'warning' ? 'rgba(245, 158, 11, 0)' : 'rgba(59, 130, 246, 0)'}`
-            ]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          }}
-        />
-      )}
-    </motion.div>
-  )
-}
+    </Transition>
+  );
+};
 
-const ToastContainer: React.FC = () => {
-  const dispatch = useAppDispatch()
-  const { notifications } = useAppSelector((state: any) => state.ui)
-  const { isAnimated } = useAnimation()
-
-  // Only show recent notifications as toasts (last 3)
-  const recentNotifications = notifications.slice(-3).filter((n: any) => !n.read)
+export const ToastNotification: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { notifications } = useAppSelector(state => state.notifications);
+  
+  // Show only high priority notifications as toasts
+  const toastNotifications = notifications
+    .filter(n => n.priority === 'high' && !n.isRead)
+    .slice(0, 3); // Limit to 3 toasts at once
 
   const handleClose = (id: string) => {
-    dispatch(removeNotification(id))
-  }
+    dispatch(deleteNotification(id));
+  };
 
-  const containerVariants = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
+  const getToastType = (notificationType: string): 'success' | 'error' | 'warning' | 'info' => {
+    switch (notificationType) {
+      case 'transaction':
+        return 'success';
+      case 'security':
+        return 'error';
+      case 'liquidity':
+        return 'warning';
+      case 'price':
+        return 'info';
+      default:
+        return 'info';
     }
-  }
+  };
 
   return (
-    <div className="fixed top-4 right-4 z-[100] max-w-sm">
-      <motion.div
-        variants={isAnimated ? containerVariants : {}}
-        animate="animate"
-      >
-        <AnimatePresence mode="popLayout">
-          {recentNotifications.map((notification: any) => (
-            <Toast
-              key={notification.id}
-              id={notification.id}
-              type={notification.type}
-              message={notification.message}
-              onClose={handleClose}
-            />
-          ))}
-        </AnimatePresence>
-      </motion.div>
+    <div
+      aria-live="assertive"
+      className="fixed inset-0 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end z-50"
+    >
+      <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
+        {toastNotifications.map((notification) => (
+          <Toast
+            key={notification.id}
+            id={notification.id}
+            type={getToastType(notification.type)}
+            title={notification.title}
+            message={notification.message}
+            onClose={() => handleClose(notification.id)}
+          />
+        ))}
+      </div>
     </div>
-  )
-}
-
-export default ToastContainer
+  );
+};

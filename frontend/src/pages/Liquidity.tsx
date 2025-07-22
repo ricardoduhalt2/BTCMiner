@@ -5,6 +5,10 @@ import { setPositions, setTotalLiquidity, setLoading } from '../store/slices/liq
 import LiquidityOverview from '../components/liquidity/LiquidityOverview'
 import LiquidityPositions from '../components/liquidity/LiquidityPositions'
 import LiquidityPools from '../components/liquidity/LiquidityPools'
+import LiquidityHealthMonitor from '../components/liquidity/LiquidityHealthMonitor'
+import LiquidityRebalancing from '../components/liquidity/LiquidityRebalancing'
+import YieldFarming from '../components/liquidity/YieldFarming'
+import LiquidityCalculator from '../components/liquidity/LiquidityCalculator'
 import AddLiquidityModal from '../components/liquidity/AddLiquidityModal'
 import { LiquidityPosition, LiquidityPool } from '../types/liquidity'
 
@@ -12,7 +16,7 @@ const Liquidity: React.FC = () => {
   const dispatch = useAppDispatch()
   const { positions, totalLiquidity, isLoading } = useAppSelector(state => state.liquidity)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'positions' | 'pools'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'positions' | 'pools' | 'health' | 'rebalancing' | 'farming' | 'calculator'>('overview')
 
   // Mock data - replace with real API calls
   const mockPositions: LiquidityPosition[] = [
@@ -82,7 +86,11 @@ const Liquidity: React.FC = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '▦' },
     { id: 'positions', label: 'My Positions', icon: '◇' },
-    { id: 'pools', label: 'Pools', icon: '≋' }
+    { id: 'pools', label: 'Pools', icon: '≋' },
+    { id: 'health', label: 'Health Monitor', icon: '⚡' },
+    { id: 'rebalancing', label: 'Rebalancing', icon: '⚖️' },
+    { id: 'farming', label: 'Yield Farming', icon: '🌾' },
+    { id: 'calculator', label: 'Calculator', icon: '🧮' }
   ]
 
   return (
@@ -149,6 +157,10 @@ const Liquidity: React.FC = () => {
             pools={mockPools}
             totalLiquidity={totalLiquidity}
             isLoading={isLoading}
+            onEmergencyWithdraw={async (positionId: string) => {
+              console.log('Emergency withdraw for position:', positionId)
+              // Implement emergency withdrawal logic
+            }}
           />
         )}
         {activeTab === 'positions' && (
@@ -162,6 +174,51 @@ const Liquidity: React.FC = () => {
             pools={mockPools}
             isLoading={isLoading}
           />
+        )}
+        {activeTab === 'health' && (
+          <LiquidityHealthMonitor 
+            pools={mockPools}
+            isLoading={isLoading}
+            onRebalanceRequest={async (poolAddress: string) => {
+              console.log('Rebalance requested for pool:', poolAddress)
+              // Implement rebalance request logic
+            }}
+          />
+        )}
+        {activeTab === 'rebalancing' && (
+          <LiquidityRebalancing 
+            pools={mockPools}
+            positions={mockPositions}
+            isLoading={isLoading}
+            onExecuteRebalance={async (poolAddress: string, action: string, amount: string) => {
+              console.log('Execute rebalance:', { poolAddress, action, amount })
+              // Implement rebalance execution logic
+            }}
+            onUpdateStrategy={(strategy) => {
+              console.log('Update strategy:', strategy)
+              // Implement strategy update logic
+            }}
+          />
+        )}
+        {activeTab === 'farming' && (
+          <YieldFarming 
+            isLoading={isLoading}
+            onStake={async (poolId: string, amount: string) => {
+              console.log('Stake:', { poolId, amount })
+              // Implement staking logic
+            }}
+            onUnstake={async (poolId: string, amount: string) => {
+              console.log('Unstake:', { poolId, amount })
+              // Implement unstaking logic
+            }}
+            onClaimRewards={async (poolId: string) => {
+              console.log('Claim rewards for pool:', poolId)
+              // Implement claim rewards logic
+            }}
+          />
+        )}
+        {activeTab === 'calculator' && (
+          <LiquidityCalculator />
         )}
       </motion.div>
 

@@ -57,10 +57,15 @@ class AnimationErrorHandler {
     }
 
     this.isInitialized = true
-    console.log('🎬 Animation Error Handler initialized')
+    // Only log in development if explicitly enabled
+    if (process.env.NODE_ENV === 'development' && localStorage.getItem('debug-animations') === 'true') {
+      console.log('🎬 Animation Error Handler initialized')
+    }
   }
 
   private handleConsoleMessage(level: 'error' | 'warn', message: string, args: any[]): boolean {
+    const debugEnabled = localStorage.getItem('debug-animations') === 'true'
+    
     // Handle framer-motion backgroundColor warning
     if (message.includes('You are trying to animate backgroundColor from "transparent" to "1"')) {
       this.logError({
@@ -71,13 +76,32 @@ class AnimationErrorHandler {
         fixed: true
       })
 
-      console.group('🎬 Animation Fix Applied')
-      console.warn('Issue: Trying to animate backgroundColor from "transparent" to "1"')
-      console.info('Solution: Use rgba(0,0,0,0) instead of "transparent" or use safeColorValue() utility')
-      console.info('Location:', this.extractComponentFromStack() || 'Unknown component')
-      console.groupEnd()
+      if (debugEnabled) {
+        console.group('🎬 Animation Fix Applied')
+        console.warn('Issue: Trying to animate backgroundColor from "transparent" to "1"')
+        console.info('Solution: Use rgba(0,0,0,0) instead of "transparent" or use safeColorValue() utility')
+        console.info('Location:', this.extractComponentFromStack() || 'Unknown component')
+        console.groupEnd()
+      }
       
       return true // Suppress original warning
+    }
+
+    // Handle performance warnings
+    if (message.includes('Performance: Long animation frame detected')) {
+      this.logError({
+        type: 'performance',
+        message: message,
+        timestamp: Date.now(),
+        component: this.extractComponentFromStack()
+      })
+
+      // Only show performance warnings if debug is enabled
+      if (debugEnabled) {
+        this.originalConsoleWarn.apply(console, args)
+      }
+      
+      return true // Suppress by default
     }
 
     // Handle other framer-motion warnings
@@ -89,11 +113,13 @@ class AnimationErrorHandler {
         component: this.extractComponentFromStack()
       })
 
-      console.group('🎬 Framer Motion Warning')
-      this.originalConsoleWarn.apply(console, args)
-      console.info('Component:', this.extractComponentFromStack() || 'Unknown')
-      console.info('Tip: Use animation utilities from utils/animationUtils.ts')
-      console.groupEnd()
+      if (debugEnabled) {
+        console.group('🎬 Framer Motion Warning')
+        this.originalConsoleWarn.apply(console, args)
+        console.info('Component:', this.extractComponentFromStack() || 'Unknown')
+        console.info('Tip: Use animation utilities from utils/animationUtils.ts')
+        console.groupEnd()
+      }
       
       return true // Suppress original warning
     }
@@ -107,10 +133,12 @@ class AnimationErrorHandler {
         component: this.extractComponentFromStack()
       })
 
-      console.group('🎬 CSS Animation Warning')
-      this.originalConsoleWarn.apply(console, args)
-      console.info('Component:', this.extractComponentFromStack() || 'Unknown')
-      console.groupEnd()
+      if (debugEnabled) {
+        console.group('🎬 CSS Animation Warning')
+        this.originalConsoleWarn.apply(console, args)
+        console.info('Component:', this.extractComponentFromStack() || 'Unknown')
+        console.groupEnd()
+      }
       
       return true
     }

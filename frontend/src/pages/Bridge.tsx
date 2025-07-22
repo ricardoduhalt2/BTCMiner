@@ -4,6 +4,7 @@ import BridgeInterface from '@components/bridge/BridgeInterface'
 import BridgeHistory from '@components/bridge/BridgeHistory'
 import BridgeStats from '@components/bridge/BridgeStats'
 import { useWalletConnection } from '@hooks/useWalletConnection'
+import WalletModal from '@components/wallet/WalletModal'
 import AnimatedPage from '@components/common/AnimatedPage'
 import AnimatedContainer from '@components/common/AnimatedContainer'
 import AnimatedList from '@components/common/AnimatedList'
@@ -15,6 +16,7 @@ const Bridge: React.FC = () => {
   const { connectedWallets } = useWalletConnection()
   const { isAnimated } = useAnimation()
   const [activeTab, setActiveTab] = useState<'bridge' | 'history' | 'stats'>('bridge')
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
 
   const hasWallets = connectedWallets.length > 0
 
@@ -25,8 +27,7 @@ const Bridge: React.FC = () => {
   ] as const
 
   const handleConnectWallet = () => {
-    // This would trigger wallet connection modal
-    console.log('Connect wallet clicked')
+    setIsWalletModalOpen(true)
   }
 
   return (
@@ -196,6 +197,12 @@ const Bridge: React.FC = () => {
           </AnimatedContainer>
         </>
       )}
+
+      {/* Wallet Connection Modal */}
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </AnimatedPage>
   )
 }

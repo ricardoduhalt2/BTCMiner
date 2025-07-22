@@ -24,10 +24,14 @@ export const useRealTimeUpdates = () => {
   // Initialize WebSocket connections, price feeds, etc.
   useEffect(() => {
     // This would set up real-time connections
-    console.log('Initializing real-time updates...')
+    if (process.env.NODE_ENV === 'development' && localStorage.getItem('debug-realtime') === 'true') {
+      console.log('Initializing real-time updates...')
+    }
     
     return () => {
-      console.log('Cleaning up real-time connections...')
+      if (process.env.NODE_ENV === 'development' && localStorage.getItem('debug-realtime') === 'true') {
+        console.log('Cleaning up real-time connections...')
+      }
     }
   }, [])
 }

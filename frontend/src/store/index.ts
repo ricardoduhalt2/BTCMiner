@@ -9,6 +9,7 @@ import priceReducer from './slices/priceSlice'
 import liquidityReducer from './slices/liquiditySlice'
 import identityReducer from './slices/identitySlice'
 import uiReducer from './slices/uiSlice'
+import notificationReducer from './slices/notificationSlice'
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     liquidity: liquidityReducer,
     identity: identityReducer,
     ui: uiReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

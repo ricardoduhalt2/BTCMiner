@@ -2,7 +2,9 @@
 
 ![BTCMiner Logo](frontend/public/logoBTCMINER.png)
 
-BTCMiner is a comprehensive multi-chain token ecosystem that enables seamless cross-chain operations, liquidity management, and decentralized identity across Ethereum, BNB Chain, Base, Solana, and Internet Computer Protocol (ICP).
+BTCMiner is a comprehensive multi-chain token ecosystem developed by Mining Freedom that enables seamless cross-chain operations, liquidity management, and decentralized identity across Ethereum, BNB Chain, Base, Solana, and Internet Computer Protocol (ICP).
+
+Mining Freedom is dedicated to advancing blockchain technology and cryptocurrency mining solutions, providing innovative tools and platforms for the decentralized finance ecosystem. Our mission is to democratize access to blockchain technology while maintaining the highest standards of security and user experience.
 
 ## 🌟 Features
 
@@ -229,20 +231,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Documentation**: [docs.btcminer.io](https://docs.btcminer.io)
-- **Discord**: [Join our community](https://discord.gg/btcminer)
-- **Twitter**: [@BTCMinerToken](https://twitter.com/BTCMinerToken)
-- **Email**: support@btcminer.io
+- **Website**: [Mining Freedom](https://miningfreedom.com/)
+- **Email**: contact@miningfreedom.com
+- **GitHub Issues**: [Report bugs and request features](https://github.com/ricardoduhalt2/BTCMiner/issues)
+- **Documentation**: [Project Wiki](https://github.com/ricardoduhalt2/BTCMiner/wiki)
+
+For technical support, business inquiries, or partnership opportunities, please reach out to us at contact@miningfreedom.com or visit our website at https://miningfreedom.com/.
+
+## 🏢 About Mining Freedom
+
+Mining Freedom is committed to advancing blockchain technology and cryptocurrency solutions. We specialize in developing innovative tools and platforms that make decentralized finance more accessible while maintaining enterprise-grade security standards.
+
+Our expertise spans across:
+- Multi-chain blockchain development
+- Smart contract architecture and security
+- DeFi protocol design and implementation
+- Cross-chain interoperability solutions
+- Cryptocurrency mining and staking infrastructure
 
 ## 🙏 Acknowledgments
 
 - LayerZero Labs for cross-chain infrastructure
 - Wormhole for Solana bridging
 - Internet Computer for decentralized identity
-- The amazing DeFi community
+- Supabase for backend infrastructure
+- The amazing DeFi and open-source community
 
 ---
 
-**Built with ❤️ by the BTCMiner Team**
+**Built with ❤️ by Mining Freedom**
 
-*Empowering the future of multi-chain DeFi*
+*Democratizing access to blockchain technology*

@@ -21,7 +21,13 @@
     "🧪:icp-test": "./scripts/test-icp-canisters.sh",
     "🔥:deploy-everything": "npm run compile && npm run 🧪:test-epic && npm run 🌌:multiverse"
   },
-  "keywords": ["layerzero", "oft", "cross-chain", "btcminer", "defi"],
+  "keywords": [
+    "layerzero",
+    "oft",
+    "cross-chain",
+    "btcminer",
+    "defi"
+  ],
   "author": "BTCMiner Team",
   "license": "MIT",
   "devDependencies": {
@@ -30,7 +36,7 @@
     "@typechain/hardhat": "^9.0.0",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.9",
     "chai": "^4.3.0",
     "hardhat": "^2.19.0",
     "hardhat-gas-reporter": "^1.0.9",
@@ -40,10 +46,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@chainlink/contracts": "^0.6.1",
     "@layerzerolabs/solidity-examples": "^1.1.0",
     "@openzeppelin/contracts": "^4.9.0",
     "@openzeppelin/contracts-upgradeable": "^4.9.0",
-    "@chainlink/contracts": "^0.6.1",
     "dotenv": "^16.3.0",
     "ethers": "^6.8.0"
   }

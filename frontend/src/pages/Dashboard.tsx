@@ -1,10 +1,15 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useWalletConnection } from '@hooks/useWalletConnection'
+import { useMobileDetection } from '@hooks/useMobileDetection'
+import { useSystemPreferences } from '@hooks/useSystemPreferences'
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate()
   const { connectedWallets, connectWallet } = useWalletConnection()
+  const { isMobile, isTouchDevice, screenSize } = useMobileDetection()
+  const { prefersReducedMotion, saveData } = useSystemPreferences()
 
   // Handle Quick Actions navigation
   const handleQuickAction = (actionTitle: string) => {
@@ -68,108 +73,153 @@ const Dashboard: React.FC = () => {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className={`space-y-${isMobile ? '6' : '8'}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+          <motion.h1 
+            className={`${isMobile ? 'text-3xl' : 'text-4xl'} font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -20 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">
+          </motion.h1>
+          <motion.p 
+            className={`text-gray-600 dark:text-gray-400 mt-2 ${isMobile ? 'text-base' : 'text-lg'}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -10 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             Welcome to your BTCMiner multi-chain platform ✨
-          </p>
+          </motion.p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
         {statsCards.map((card, index) => (
-          <div
+          <motion.div
             key={card.title}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 ${isMobile ? 'p-4' : 'p-6'} ${!prefersReducedMotion ? 'hover:shadow-xl transition-all duration-300' : ''} ${isTouchDevice ? 'active:scale-95' : 'hover:scale-105'}`}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-900 dark:text-gray-100`}>
                 {card.title}
               </h3>
-              <div className="text-2xl">
+              <div className={`${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {card.icon}
               </div>
             </div>
             
-            <div className={`text-3xl font-bold ${card.color} mb-2`}>
+            <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold ${card.color} mb-2`}>
               {card.value}
             </div>
             
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               {card.description}
             </p>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {/* Welcome Message */}
       {connectedWallets.length === 0 && (
-        <div className="bg-gradient-to-br from-orange-50 via-orange-100 to-yellow-50 dark:from-orange-900/20 dark:via-orange-800/20 dark:to-yellow-900/20 rounded-2xl p-8 text-center">
+        <motion.div 
+          className={`bg-gradient-to-br from-orange-50 via-orange-100 to-yellow-50 dark:from-orange-900/20 dark:via-orange-800/20 dark:to-yellow-900/20 rounded-2xl ${isMobile ? 'p-6' : 'p-8'} text-center`}
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
+          animate={prefersReducedMotion ? false : { opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <div className="mb-4">
-            <img 
+            <motion.img 
               src="/logoBTCMINER.png" 
               alt="BTCMiner Logo" 
-              className="w-20 h-20 mx-auto rounded-lg shadow-lg"
+              className={`${isMobile ? 'w-16 h-16' : 'w-20 h-20'} mx-auto rounded-lg shadow-lg`}
+              initial={prefersReducedMotion ? false : { scale: 0 }}
+              animate={prefersReducedMotion ? false : { scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5, type: "spring" }}
             />
           </div>
           
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent mb-4">
+          <motion.h2 
+            className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent mb-4`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
             Welcome to BTCMiner
-          </h2>
+          </motion.h2>
           
-          <p className="text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
+          <motion.p 
+            className={`text-gray-700 dark:text-gray-300 ${isMobile ? 'mb-6' : 'mb-8'} max-w-2xl mx-auto ${isMobile ? 'text-base' : 'text-lg'} leading-relaxed`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
             Get started by connecting your wallets to access cross-chain features, 
             manage your identity, and explore the multi-chain ecosystem.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div 
+            className={`flex ${isMobile ? 'flex-col' : 'flex-col sm:flex-row'} gap-4 justify-center`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
             <button 
               onClick={handleConnectWallet}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg"
+              className={`${isMobile ? 'w-full' : ''} px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-lg ${!prefersReducedMotion ? 'hover:from-orange-600 hover:to-orange-700 transition-all duration-300' : ''} shadow-lg ${isTouchDevice ? 'active:scale-95' : ''}`}
             >
               ◆ Connect Wallet
             </button>
             <button 
               onClick={handleLearnMore}
-              className="px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-bold rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
+              className={`${isMobile ? 'w-full' : ''} px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-bold rounded-lg border border-gray-300 dark:border-gray-600 ${!prefersReducedMotion ? 'hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300' : ''} ${isTouchDevice ? 'active:scale-95' : ''}`}
             >
               ◉ Learn More
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        <motion.h2 
+          className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-900 dark:text-gray-100 ${isMobile ? 'mb-4' : 'mb-6'}`}
+          initial={prefersReducedMotion ? false : { opacity: 0, x: -20 }}
+          animate={prefersReducedMotion ? false : { opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.9 }}
+        >
           Quick Actions
-        </h2>
+        </motion.h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-2 md:grid-cols-4 gap-4'}`}>
           {[
             { title: 'Bridge Assets', icon: '⟐', color: 'bg-blue-500' },
             { title: 'Manage Identity', icon: '⬢', color: 'bg-purple-500' },
             { title: 'View Portfolio', icon: '⟋', color: 'bg-green-500' },
             { title: 'Price Monitor', icon: '▦', color: 'bg-orange-500' }
           ].map((action, index) => (
-            <button
+            <motion.button
               key={action.title}
               onClick={() => handleQuickAction(action.title)}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center group"
+              className={`${isMobile ? 'p-4' : 'p-6'} bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 ${!prefersReducedMotion ? 'hover:shadow-xl hover:scale-105 transition-all duration-300' : ''} text-center group ${isTouchDevice ? 'active:scale-95' : ''}`}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+              animate={prefersReducedMotion ? false : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1 + index * 0.1 }}
+              whileTap={isTouchDevice ? { scale: 0.95 } : {}}
             >
-              <div className="text-4xl mb-3">
+              <div className={`${isMobile ? 'text-3xl mb-2' : 'text-4xl mb-3'}`}>
                 {action.icon}
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-orange-600 transition-colors">
+              <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold text-gray-900 dark:text-gray-100 ${!prefersReducedMotion ? 'group-hover:text-orange-600 transition-colors' : ''}`}>
                 {action.title}
               </h3>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
