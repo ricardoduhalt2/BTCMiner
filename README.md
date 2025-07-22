@@ -1,6 +1,6 @@
 # BTCMiner - Multi-Chain Token Ecosystem
 
-![BTCMiner Logo](frontend/public/logoBTCMINER.png)
+![BTCMiner Logo](https://raw.githubusercontent.com/ricardoduhalt2/BTCMiner/main/frontend/public/logoBTCMINER.png)
 
 BTCMiner is a comprehensive multi-chain token ecosystem developed by Mining Freedom that enables seamless cross-chain operations, liquidity management, and decentralized identity across Ethereum, BNB Chain, Base, Solana, and Internet Computer Protocol (ICP).
 
