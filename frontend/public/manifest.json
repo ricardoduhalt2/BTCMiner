@@ -1,0 +1,98 @@
+{
+  "name": "BTCMiner - Multi-Chain DeFi Platform",
+  "short_name": "BTCMiner",
+  "description": "Advanced multi-chain DeFi platform for BTCMiner token management across Ethereum, BNB Chain, Base, Solana, and ICP networks",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#3B82F6",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "productivity", "utilities"],
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+btcminer",
+      "url": "/?action=%s"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/logoBTCMINER.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logoBTCMINER.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard view on mobile"
+    },
+    {
+      "src": "/screenshots/dashboard-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard view on desktop"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your portfolio dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/logoBTCMINER.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "short_name": "Bridge",
+      "description": "Cross-chain token bridge",
+      "url": "/bridge",
+      "icons": [
+        {
+          "src": "/logoBTCMINER.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Trading",
+      "short_name": "Trading",
+      "description": "Advanced trading interface",
+      "url": "/trading",
+      "icons": [
+        {
+          "src": "/logoBTCMINER.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "capture_links": "existing-client-navigate"
+}
