@@ -5,16 +5,19 @@ import * as BTCMinerABI from '../contracts/BTCMiner.json'
 // Asegurar que el ABI tenga el tipo correcto
 const BTCMinerABI_ABI = BTCMinerABI.abi as InterfaceAbi
 
-// Configuración de la red Sepolia con datos reales desde variables de entorno
+// Configuración de la red Sepolia con datos reales desde el deployment
 const SEPOLIA_CONFIG = {
   id: 'ethereum',
   name: 'Ethereum Sepolia',
   emoji: 'ethereum',
   rpcUrl: import.meta.env.VITE_SEPOLIA_RPC_URL || 'https://eth-sepolia.public.blastapi.io',
   chainId: 11155111,
-  contractAddress: import.meta.env.VITE_BTCMINER_CONTRACT_SEPOLIA || '0xc39A8ecD3492083723dd55f09BF0838F93E9fa42',
+  contractAddress: '0xc39A8ecD3492083723dd55f09BF0838F93E9fa42', // Contrato real desplegado
   explorerUrl: 'https://sepolia.etherscan.io',
-  txHash: '0x6328b5d32fe5b7b10c197d6437d6febb6238826e9363d265c81b84993b317e97'
+  txHash: '0x6328b5d32fe5b7b10c197d6437d6febb6238826e9363d265c81b84993b317e97', // TX real de deployment
+  deployer: '0xB4784dc9c060BB06Ac1aF0C231f3638fEa5CB8Df',
+  gasUsed: '4951458',
+  deploymentTime: 1753219477844
 };
 
 export interface ChainStatus {
@@ -48,11 +51,16 @@ export interface DeploymentStats {
 
 const INITIAL_CHAINS: ChainStatus[] = [
   { 
-    ...SEPOLIA_CONFIG, 
+    id: SEPOLIA_CONFIG.id,
+    name: SEPOLIA_CONFIG.name,
+    emoji: SEPOLIA_CONFIG.emoji,
     status: 'success' as const, 
     progress: 100,
-    gasUsed: '4951458',
-    deploymentTime: Math.floor(1753219477 / 1000)
+    contractAddress: SEPOLIA_CONFIG.contractAddress,
+    gasUsed: SEPOLIA_CONFIG.gasUsed,
+    explorerUrl: `${SEPOLIA_CONFIG.explorerUrl}/address/${SEPOLIA_CONFIG.contractAddress}`,
+    deploymentTime: Math.floor(SEPOLIA_CONFIG.deploymentTime / 1000),
+    txHash: SEPOLIA_CONFIG.txHash
   },
   { id: 'bsc', name: 'BNB Chain Testnet', emoji: 'bnb', status: 'pending', progress: 0 },
   { id: 'base', name: 'Base Sepolia', emoji: 'base', status: 'pending', progress: 0 },
@@ -62,7 +70,32 @@ const INITIAL_CHAINS: ChainStatus[] = [
 
 export const useDeployment = () => {
   const [chains, setChains] = useState<ChainStatus[]>(INITIAL_CHAINS)
-  const [logs, setLogs] = useState<LogEntry[]>([])
+  const [logs, setLogs] = useState<LogEntry[]>([
+    {
+      id: Date.now().toString(),
+      timestamp: new Date().toLocaleTimeString(),
+      message: '🎯 BTCMiner Multi-Chain Deployment Dashboard Initialized',
+      type: 'info'
+    },
+    {
+      id: (Date.now() + 1).toString(),
+      timestamp: new Date().toLocaleTimeString(),
+      message: `✅ Ethereum Sepolia: Contract deployed at ${SEPOLIA_CONFIG.contractAddress}`,
+      type: 'success'
+    },
+    {
+      id: (Date.now() + 2).toString(),
+      timestamp: new Date().toLocaleTimeString(),
+      message: `🔗 Explorer: ${SEPOLIA_CONFIG.explorerUrl}/address/${SEPOLIA_CONFIG.contractAddress}`,
+      type: 'info'
+    },
+    {
+      id: (Date.now() + 3).toString(),
+      timestamp: new Date().toLocaleTimeString(),
+      message: '🚀 Ready to interact with deployed contracts! Click "Start Deployment" to begin.',
+      type: 'info'
+    }
+  ])
   const [isDeploying, setIsDeploying] = useState(false)
   const [deploymentStartTime, setDeploymentStartTime] = useState<number | null>(null)
   const [provider, setProvider] = useState<BrowserProvider | null>(null)
@@ -76,8 +109,8 @@ export const useDeployment = () => {
     const init = async () => {
       if (typeof window.ethereum !== 'undefined') {
         try {
-          // Solicitar acceso a la cuenta
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+          // Verificar si ya hay cuentas conectadas (sin solicitar acceso)
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
           if (accounts.length > 0) {
             setAccount(accounts[0])
             
@@ -283,21 +316,25 @@ export const useDeployment = () => {
       // Si el saldo es 0 o muy bajo, intentar minar tokens
       const minBalance = ethers.parseEther('100') // Mínimo de 100 tokens
       if (balance < minBalance) {
-        addLogEntry('⛏️ Minando tokens BTCM...', 'info')
+        addLogEntry('⛏️ Preparando para minar tokens BTCM...', 'info')
         updateChainStatus(SEPOLIA_CONFIG.id, 'deploying', { progress: 25 })
         
         try {
-          // Usar la función mint en lugar de mine (más común en contratos ERC20)
-          const mintAmount = ethers.parseEther('1000')
-          let tx
+          // Primero verificar si el usuario tiene el rol ROUTER_ROLE
+          const ROUTER_ROLE = await contractInstance.ROUTER_ROLE()
+          const hasRouterRole = await contractInstance.hasRole(ROUTER_ROLE, currentAccount)
           
-          // Intentar primero con mint, si falla usar mine
-          try {
-            tx = await contractInstance.mint(currentAccount, mintAmount)
-          } catch (mintError) {
-            addLogEntry('🔄 Intentando con función mine...', 'info')
-            tx = await contractInstance.mine(mintAmount)
+          if (!hasRouterRole) {
+            addLogEntry('🔑 Otorgando permisos de minado...', 'info')
+            const grantRoleTx = await contractInstance.grantRole(ROUTER_ROLE, currentAccount)
+            await grantRoleTx.wait()
+            addLogEntry('✅ Permisos otorgados correctamente', 'success')
           }
+          
+          // Ahora minar tokens
+          addLogEntry('⛏️ Minando tokens BTCM...', 'info')
+          const mintAmount = ethers.parseEther('1000')
+          const tx = await contractInstance.mint(currentAccount, mintAmount)
           
           addLogEntry('⏳ Esperando confirmación de la transacción...', 'info')
           updateChainStatus(SEPOLIA_CONFIG.id, 'deploying', { progress: 75 })
