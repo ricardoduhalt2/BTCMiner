@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -38,12 +38,12 @@ async function main() {
   // Guardar información del despliegue
   const deploymentInfo = {
     network: network.name,
-    chainId: network.chainId,
+    chainId: network.chainId.toString(),
     contractName: "BTCMiner",
     contractAddress: contractAddress,
     deployer: deployer.address,
     timestamp: new Date().toISOString(),
-    transactionHash: btcMiner.deploymentTransaction()?.hash
+    transactionHash: btcMiner.deploymentTransaction()?.hash || ""
   };
   
   const deploymentsDir = path.join(__dirname, "../deployments");
@@ -52,7 +52,12 @@ async function main() {
   }
   
   const deploymentFile = path.join(deploymentsDir, `deployment-${network.name}-${Date.now()}.json`);
-  fs.writeFileSync(deploymentFile, JSON.stringify(deploymentInfo, null, 2));
+  
+  // Función para manejar la serialización de BigInt
+  const replacer = (key: string, value: any) => 
+    typeof value === 'bigint' ? value.toString() : value;
+  
+  fs.writeFileSync(deploymentFile, JSON.stringify(deploymentInfo, replacer, 2));
   
   console.log(`\n📝 Información de despliegue guardada en: ${deploymentFile}`);
   
@@ -75,7 +80,7 @@ async function main() {
   // Verificar el contrato en Etherscan
   console.log("\n🔍 Verificando contrato en Etherscan...");
   try {
-    await hre.run("verify:verify", {
+    await run("verify:verify", {
       address: contractAddress,
       constructorArguments: [
         CONFIG.LAYERZERO_ENDPOINT,

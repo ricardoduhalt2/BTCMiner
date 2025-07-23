@@ -5,14 +5,14 @@ import * as BTCMinerABI from '../contracts/BTCMiner.json'
 // Asegurar que el ABI tenga el tipo correcto
 const BTCMinerABI_ABI = BTCMinerABI.abi as InterfaceAbi
 
-// Configuración de la red Sepolia
+// Configuración de la red Sepolia con datos reales desde variables de entorno
 const SEPOLIA_CONFIG = {
   id: 'ethereum',
   name: 'Ethereum Sepolia',
   emoji: 'ethereum',
   rpcUrl: import.meta.env.VITE_SEPOLIA_RPC_URL || 'https://eth-sepolia.public.blastapi.io',
   chainId: 11155111,
-  contractAddress: '0xc39A8ecD3492083723dd55f09BF0838F93E9fa42',
+  contractAddress: import.meta.env.VITE_BTCMINER_CONTRACT_SEPOLIA || '0xc39A8ecD3492083723dd55f09BF0838F93E9fa42',
   explorerUrl: 'https://sepolia.etherscan.io',
   txHash: '0x6328b5d32fe5b7b10c197d6437d6febb6238826e9363d265c81b84993b317e97'
 };
@@ -253,6 +253,25 @@ export const useDeployment = () => {
       
       addLogEntry('🚀 Iniciando interacción con el contrato BTCMiner...', 'info')
       
+      // Verificar que estamos en la red correcta
+      const network = await provider?.getNetwork()
+      if (network && Number(network.chainId) !== SEPOLIA_CONFIG.chainId) {
+        addLogEntry(`⚠️ Red incorrecta. Por favor cambia a ${SEPOLIA_CONFIG.name} (Chain ID: ${SEPOLIA_CONFIG.chainId})`, 'warning')
+        try {
+          // Intentar cambiar a Sepolia automáticamente
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: `0x${SEPOLIA_CONFIG.chainId.toString(16)}` }],
+          })
+          addLogEntry('✅ Red cambiada a Sepolia exitosamente', 'success')
+        } catch (switchError: any) {
+          if (switchError.code === 4902) {
+            addLogEntry('❌ Red Sepolia no configurada en MetaMask', 'error')
+          }
+          throw new Error('Por favor cambia manualmente a la red Sepolia en MetaMask')
+        }
+      }
+      
       // Verificar el saldo del token
       addLogEntry('🔍 Verificando saldo del token...', 'info')
       const balance = await contractInstance.balanceOf(currentAccount)
@@ -261,30 +280,60 @@ export const useDeployment = () => {
       
       addLogEntry(`💰 Tu saldo de BTCM es: ${formattedBalance}`, 'success')
       
-      // Si el saldo es 0, intentar minar tokens
-      if (balance === 0n) {
+      // Si el saldo es 0 o muy bajo, intentar minar tokens
+      const minBalance = ethers.parseEther('100') // Mínimo de 100 tokens
+      if (balance < minBalance) {
         addLogEntry('⛏️ Minando tokens BTCM...', 'info')
-        const tx = await contractInstance.mine(ethers.parseEther('1000'))
-        addLogEntry('⏳ Esperando confirmación de la transacción...', 'info')
+        updateChainStatus(SEPOLIA_CONFIG.id, 'deploying', { progress: 25 })
         
-        const receipt = await tx.wait()
-        const newBalance = await contractInstance.balanceOf(currentAccount)
-        const newFormattedBalance = ethers.formatUnits(newBalance, decimals)
-        
-        addLogEntry(`✅ ¡Tokens minados exitosamente! Nuevo saldo: ${newFormattedBalance} BTCM`, 'success')
-        
-        if (receipt?.hash) {
-          addLogEntry(`📝 Transacción: ${SEPOLIA_CONFIG.explorerUrl}/tx/${receipt.hash}`, 'info')
+        try {
+          // Usar la función mint en lugar de mine (más común en contratos ERC20)
+          const mintAmount = ethers.parseEther('1000')
+          let tx
           
-          // Actualizar el estado con la información del contrato
-          updateChainStatus(SEPOLIA_CONFIG.id, 'success', {
-            contractAddress: SEPOLIA_CONFIG.contractAddress,
-            explorerUrl: `${SEPOLIA_CONFIG.explorerUrl}/address/${SEPOLIA_CONFIG.contractAddress}`,
-            txHash: receipt.hash,
-            gasUsed: receipt.gasUsed?.toString() || '0',
-            deploymentTime: Math.floor(Date.now() / 1000)
-          })
+          // Intentar primero con mint, si falla usar mine
+          try {
+            tx = await contractInstance.mint(currentAccount, mintAmount)
+          } catch (mintError) {
+            addLogEntry('🔄 Intentando con función mine...', 'info')
+            tx = await contractInstance.mine(mintAmount)
+          }
+          
+          addLogEntry('⏳ Esperando confirmación de la transacción...', 'info')
+          updateChainStatus(SEPOLIA_CONFIG.id, 'deploying', { progress: 75 })
+          
+          const receipt = await tx.wait()
+          const newBalance = await contractInstance.balanceOf(currentAccount)
+          const newFormattedBalance = ethers.formatUnits(newBalance, decimals)
+          
+          addLogEntry(`✅ ¡Tokens minados exitosamente! Nuevo saldo: ${newFormattedBalance} BTCM`, 'success')
+          
+          if (receipt?.hash) {
+            addLogEntry(`📝 Hash de transacción: ${receipt.hash}`, 'info')
+            addLogEntry(`🔗 Ver en explorador: ${SEPOLIA_CONFIG.explorerUrl}/tx/${receipt.hash}`, 'info')
+            
+            // Actualizar el estado con la información del contrato
+            updateChainStatus(SEPOLIA_CONFIG.id, 'success', {
+              contractAddress: SEPOLIA_CONFIG.contractAddress,
+              explorerUrl: `${SEPOLIA_CONFIG.explorerUrl}/address/${SEPOLIA_CONFIG.contractAddress}`,
+              txHash: receipt.hash,
+              gasUsed: receipt.gasUsed?.toString() || '0',
+              deploymentTime: Math.floor(Date.now() / 1000),
+              progress: 100
+            })
+          }
+        } catch (mintError: any) {
+          addLogEntry(`❌ Error al minar tokens: ${mintError.message}`, 'error')
+          updateChainStatus(SEPOLIA_CONFIG.id, 'failed')
+          throw mintError
         }
+      } else {
+        addLogEntry('✅ Ya tienes suficientes tokens BTCM', 'success')
+        updateChainStatus(SEPOLIA_CONFIG.id, 'success', {
+          contractAddress: SEPOLIA_CONFIG.contractAddress,
+          explorerUrl: `${SEPOLIA_CONFIG.explorerUrl}/address/${SEPOLIA_CONFIG.contractAddress}`,
+          progress: 100
+        })
       }
       
       // Obtener información del token
