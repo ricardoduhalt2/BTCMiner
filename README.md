@@ -20,7 +20,11 @@ Mining Freedom is dedicated to advancing blockchain technology and cryptocurrenc
 - **Smooth Animations** - Framer Motion powered micro-interactions
 - **Responsive Design** - Mobile-first approach with TailwindCSS
 - **Real-time Updates** - WebSocket integration for live data
-- **Multi-wallet Support** - MetaMask, WalletConnect, Phantom, Internet Identity
+- **Robust Wallet Integration** - Seamless connection with MetaMask and other wallets
+  - Automatic provider detection and fallback mechanisms
+  - Support for multiple wallet providers simultaneously
+  - Comprehensive error handling and user feedback
+  - Secure transaction signing with clear confirmations
 
 ### 🔐 Security Features
 - **Multi-signature Governance** - 3-of-5 multisig for admin functions

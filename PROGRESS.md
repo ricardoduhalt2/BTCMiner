@@ -11,10 +11,15 @@
 - [x] Estructura de carpetas y arquitectura base
 
 #### 2. Autenticación y Billeteras
-- [x] Integración de MetaMask para Ethereum/BNB Chain/Base
+- [x] Integración robusta de MetaMask con soporte para múltiples proveedores
+  - [x] Detección automática de proveedores Ethereum
+  - [x] Manejo de múltiples instancias de billeteras
+  - [x] Sistema de reintentos y manejo de errores mejorado
+  - [x] Soporte para métodos legacy y modernos de conexión
 - [x] Conexión con Phantom Wallet para Solana
 - [x] Autenticación con Internet Identity (ICP)
 - [x] Gestión de sesión y estado de autenticación
+- [x] Sistema de notificaciones para transacciones
 
 #### 3. Interfaz de Usuario
 - [x] Diseño responsive del dashboard principal

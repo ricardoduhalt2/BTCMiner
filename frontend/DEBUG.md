@@ -44,7 +44,39 @@ localStorage.removeItem('debug-theme')
 - Verificación de elementos huérfanos
 - Elementos de Framer Motion problemáticos
 
-### 3. Debug de Real-time Updates
+### 3. Debug de Conexión con Wallets
+
+#### MetaMask y Proveedores Ethereum
+
+Para habilitar logs detallados de la conexión con MetaMask y otros proveedores Ethereum:
+
+```javascript
+localStorage.setItem('debug-wallet', 'true')
+```
+
+**Qué incluye:**
+- Detección de proveedores Ethereum
+- Intentos de conexión y errores
+- Manejo de múltiples proveedores
+- Métodos de conexión utilizados
+- Eventos de cambio de cuenta y red
+
+#### Errores Comunes y Soluciones
+
+1. **Proveedor no detectado**
+   - Verifica que MetaMask esté instalado
+   - Intenta recargar la página después de instalar MetaMask
+   - Revisa la consola para mensajes de error específicos
+
+2. **Múltiples proveedores detectados**
+   - El sistema intentará automáticamente usar el proveedor de MetaMask
+   - Los logs mostrarán qué proveedor se está utilizando
+
+3. **Error en la solicitud de cuentas**
+   - Verifica que MetaMask esté desbloqueado
+   - Asegúrate de haber otorgado los permisos necesarios
+
+### 4. Debug de Real-time Updates
 
 Para habilitar logs de conexiones en tiempo real:
 

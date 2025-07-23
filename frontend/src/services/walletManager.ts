@@ -90,21 +90,204 @@ class WalletManager extends EventEmitter {
   }
 
   private async connectMetaMask(): Promise<ConnectedWallet> {
-    if (typeof window.ethereum === 'undefined') {
-      throw new WalletError('MetaMask is not installed', 'WALLET_NOT_INSTALLED', 'metamask')
+    console.log('🚀 Attempting to connect to MetaMask...')
+    
+    // Verificar si window.ethereum está disponible de manera segura
+    let ethereum = (window as any).ethereum
+    
+    // Verificar si hay múltiples proveedores inyectados
+    if (ethereum?.providers?.length > 0) {
+      console.log('🔍 Multiple Ethereum providers detected:', ethereum.providers)
+      
+      // Buscar específicamente MetaMask
+      let metaMaskProvider = ethereum.providers.find(
+        (p: any) => p.isMetaMask
+      )
+      
+      // Si no encontramos MetaMask, buscar cualquier proveedor que tenga el método request
+      if (!metaMaskProvider) {
+        console.log('🔍 MetaMask not found, looking for any provider with request method...')
+        metaMaskProvider = ethereum.providers.find(
+          (p: any) => typeof p.request === 'function'
+        )
+      }
+      
+      if (metaMaskProvider) {
+        console.log('✅ Found provider:', metaMaskProvider)
+        // Usar el proveedor seleccionado directamente
+        ethereum = metaMaskProvider
+        // Actualizar la referencia global
+        ;(window as any).ethereum = ethereum
+      } else {
+        console.warn('⚠️ No suitable provider found, using first available')
+        ethereum = ethereum.providers[0]
+      }
     }
+    
+    if (!ethereum) {
+      console.error('❌ MetaMask not found in window.ethereum')
+      throw new WalletError(
+        'MetaMask is not installed. Please install the MetaMask extension and refresh the page.',
+        'WALLET_NOT_INSTALLED',
+        'metamask'
+      )
+    }
+    
+    // Verificar si hay una extensión conflictiva
+    if (ethereum.isBraveWallet) {
+      console.warn('⚠️ Detected Brave Wallet, which might interfere with MetaMask')
+    }
+    
+    // Verificar métodos disponibles
+    console.log('🔍 Available methods:', 
+      Object.keys(ethereum)
+        .filter(k => typeof (ethereum as any)[k] === 'function')
+        .join(', ')
+    )
+
+    console.log('✅ window.ethereum found, checking if MetaMask is available...')
 
     try {
-      // Check if MetaMask is available and responsive
-      if (!window.ethereum.isMetaMask) {
-        throw new WalletError('MetaMask not detected', 'WALLET_NOT_DETECTED', 'metamask')
-      }
-
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+      // Verificar si es MetaMask
+      const isMetaMask = ethereum.isMetaMask
+      console.log('🔍 isMetaMask:', isMetaMask)
       
-      if (accounts.length === 0) {
-        throw new WalletError('No accounts found', 'NO_ACCOUNTS', 'metamask')
+      if (!isMetaMask) {
+        console.error('❌ MetaMask not detected in window.ethereum.isMetaMask')
+        throw new WalletError(
+          'Please make sure MetaMask is installed and unlocked.',
+          'WALLET_NOT_DETECTED',
+          'metamask'
+        )
+      }
+      
+      console.log('🔌 MetaMask detected, attempting to connect...')
+      
+      // Función auxiliar para hacer la solicitud de manera segura
+      const safeRequest = async (method: string, params: any[] = []) => {
+        const requestId = Date.now()
+        const logPrefix = `[${requestId}]`
+        
+        try {
+          console.log(`${logPrefix} 🔵 Sending request: ${method}`, params)
+          
+          // 1. Intentar con el método request estándar
+          if (typeof ethereum.request === 'function') {
+            try {
+              console.log(`${logPrefix} Using ethereum.request...`)
+              const result = await ethereum.request({ 
+                method, 
+                params,
+                jsonrpc: '2.0',
+                id: requestId,
+              })
+              console.log(`${logPrefix} 🟢 Response from ${method}:`, result)
+              return result
+            } catch (error) {
+              console.error(`${logPrefix} 🔴 Error in ethereum.request:`, error)
+              // No lanzar error todavía, intentar con otros métodos
+            }
+          }
+          
+          // 2. Si el método es eth_requestAccounts, intentar con ethereum.enable()
+          if (method === 'eth_requestAccounts' && typeof ethereum.enable === 'function') {
+            try {
+              console.log(`${logPrefix} ⚠️ Trying ethereum.enable()...`)
+              const result = await ethereum.enable()
+              console.log(`${logPrefix} 🟢 ethereum.enable() result:`, result)
+              return result
+            } catch (error) {
+              console.error(`${logPrefix} 🔴 Error in ethereum.enable():`, error)
+            }
+          }
+          
+          // 3. Intentar con sendAsync
+          if (typeof ethereum.sendAsync === 'function') {
+            try {
+              console.log(`${logPrefix} Trying ethereum.sendAsync...`)
+              return await new Promise((resolve, reject) => {
+                ethereum.sendAsync({
+                  method,
+                  params,
+                  from: ethereum.selectedAddress,
+                  jsonrpc: '2.0',
+                  id: requestId,
+                }, (err: any, result: any) => {
+                  if (err) {
+                    console.error(`${logPrefix} 🔴 Error in sendAsync:`, err)
+                    reject(err)
+                  } else {
+                    console.log(`${logPrefix} 🟢 sendAsync result:`, result)
+                    resolve(result?.result)
+                  }
+                })
+              })
+            } catch (error) {
+              console.error(`${logPrefix} 🔴 Error in sendAsync:`, error)
+            }
+          }
+          
+          // 4. Si todo falla, lanzar un error
+          const error = new Error(`No se pudo completar la solicitud: ${method}`)
+          console.error(`${logPrefix} ❌ No compatible provider methods found`)
+          console.error(`${logPrefix} Available methods:`, 
+            Object.keys(ethereum)
+              .filter(k => typeof (ethereum as any)[k] === 'function')
+              .join(', ')
+          )
+          throw error
+          
+        } catch (error) {
+          console.error(`${logPrefix} ❌ Error in safeRequest(${method}):`, error)
+          throw error
+        }
+      }
+      
+      // Obtener cuentas
+      let accounts: string[] = []
+      try {
+        // Intentar obtener cuentas existentes primero
+        accounts = await safeRequest('eth_accounts') as string[]
+        console.log('📋 Existing accounts:', accounts)
+        
+        // Si no hay cuentas, solicitar acceso
+        if (!accounts || accounts.length === 0) {
+          console.log('🔓 No existing accounts, requesting access...')
+          accounts = await safeRequest('eth_requestAccounts') as string[]
+          console.log('🔑 Accounts after request:', accounts)
+        }
+        
+        if (!accounts || accounts.length === 0) {
+          throw new WalletError(
+            'No accounts available. Please unlock MetaMask and try again.',
+            'NO_ACCOUNTS',
+            'metamask'
+          )
+        }
+      } catch (error: any) {
+        console.error('❌ Error requesting accounts:', error)
+        if (error.code === 4001 || error.code === -32002) {
+          throw new WalletError(
+            'You have rejected the connection request or have a pending request.',
+            'USER_REJECTED',
+            'metamask'
+          )
+        }
+        throw new WalletError(
+          error.message || 'Failed to connect to MetaMask',
+          'CONNECTION_FAILED',
+          'metamask'
+        )
+      }
+      
+      // Obtener el chainId
+      let chainId: string
+      try {
+        chainId = await safeRequest('eth_chainId') as string
+        console.log('🌐 Chain ID:', chainId)
+      } catch (error) {
+        console.error('❌ Error getting chain ID:', error)
+        chainId = '0x1' // Valor por defecto (Ethereum Mainnet)
       }
 
       const chainIdNumber = parseInt(chainId, 16)

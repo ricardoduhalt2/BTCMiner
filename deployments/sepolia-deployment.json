@@ -1,0 +1,10 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "lzChainId": 10161,
+  "contractAddress": "0xc39A8ecD3492083723dd55f09BF0838F93E9fa42",
+  "deploymentTx": "0x6328b5d32fe5b7b10c197d6437d6febb6238826e9363d265c81b84993b317e97",
+  "deployer": "0xB4784dc9c060BB06Ac1aF0C231f3638fEa5CB8Df",
+  "gasUsed": "4951458",
+  "timestamp": 1753219477844
+}
